@@ -141,7 +141,7 @@ fi
 export ROS_LOCALHOST_ONLY=1
 export DRONE_DEVICE_ID=drone01
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/DEFAULT_FASTRTPS_PROFILES.xml
+export FASTRTPS_DEFAULT_PROFILES_FILE=/opt/env/host/ros2/DEFAULT_FASTRTPS_PROFILES.xml
 
 alias clbt='colcon build --packages-up-to $(basename `pwd`)'
 alias clb='colcon build --symlink-install'
