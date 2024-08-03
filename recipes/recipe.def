@@ -1,0 +1,33 @@
+Bootstrap: docker
+From: ros:humble
+
+%post
+
+    apt -y update
+    apt -y install ament-cmake \
+      ros-humble-geographic-msgs \
+      ros-humble-geometry-msgs \
+      ros-humble-tf2-geometry-msgs \
+      ros-humble-std-msgs \
+      ros-humble-nav-msgs \
+      libboost-all-dev
+
+    export CUSTOM_LOCATION=/opt/env/
+    mkdir -p $CUSTOM_LOCATION
+
+    ln -s $CUSTOM_LOCATION/host/99-env.sh /.singularity.d/env/99-env.sh
+
+%environment
+    export LC_ALL=C
+    export LANG=en_US.UTF-8
+
+%runscript
+  CMD="${@}"
+
+  if [ -z "${CMD}" ]; then
+    /bin/bash --login
+  else
+    /bin/bash --login -c "${CMD}"
+  fi
+
+  exit 0

@@ -1,0 +1,6 @@
+# ignore everything
+/*
+# expect these files and directories
+!.gitignore
+!.gitkeep
+!src/
