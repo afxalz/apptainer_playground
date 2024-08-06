@@ -10,8 +10,14 @@ From: ros:humble
       ros-humble-tf2-geometry-msgs \
       ros-humble-std-msgs \
       ros-humble-nav-msgs \
-      libboost-all-dev
-
+      libboost-all-dev \
+      iputils-ping \
+      iproute2 \
+      gdb \
+      git \
+      ros-humble-backward-ros \
+      tmux
+ 
     export CUSTOM_LOCATION=/opt/env/
     mkdir -p $CUSTOM_LOCATION
 
