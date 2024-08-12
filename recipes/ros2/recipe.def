@@ -4,7 +4,8 @@ From: ros:humble
 %post
 
     apt -y update
-    apt -y install ament-cmake \
+    apt -y install \
+      ament-cmake \
       ros-humble-geographic-msgs \
       ros-humble-geometry-msgs \
       ros-humble-tf2-geometry-msgs \
