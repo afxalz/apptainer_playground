@@ -25,8 +25,13 @@ MOUNT_PATH="$CUSTOM_APPTAINER_PATH/mount"
 
 # use <file>.sif for normal container
 # use <folder>/ for sandbox container
-CONTAINER_NAME="ros2_humble.sif"
-OVERLAY_NAME="ros2_humble.img"
+if [ -z "$2" ]; then
+  CONTAINER_NAME="ros2_jazzy.sif"
+  OVERLAY_NAME="ros2_jazzy.img"
+else
+  CONTAINER_NAME=$2".sif"
+  OVERLAY_NAME=$2".img"
+fi
 
 CONTAINED=true  # true: will isolate from the HOST's home
 CLEAN_ENV=true # true: will clean the shell environment before runnning container
