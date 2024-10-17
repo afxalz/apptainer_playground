@@ -1,20 +1,25 @@
 Bootstrap: docker
-From: ros:humble
+From: ros:jazzy
 
 %post
 
     apt -y update
-    apt -y install ament-cmake \
-      ros-humble-geographic-msgs \
-      ros-humble-geometry-msgs \
-      ros-humble-tf2-geometry-msgs \
-      ros-humble-std-msgs \
-      ros-humble-nav-msgs \
-      libboost-all-dev
+    apt -y install \
+      ros-jazzy-ament-cmake \
+      ros-jazzy-geometry-msgs \
+      ros-jazzy-std-msgs \
+      iputils-ping \
+      iproute2 \
+      gdb \
+      git \
+      tmux
 
+# directory to store env config files
     export CUSTOM_LOCATION=/opt/env/
     mkdir -p $CUSTOM_LOCATION
 
+# link the env file (will be mounted at runtime) to the default env file
+# file in /.singularity.d/env/99-env.sh are sourced at startup
     ln -s $CUSTOM_LOCATION/host/99-env.sh /.singularity.d/env/99-env.sh
 
 %environment

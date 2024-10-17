@@ -113,7 +113,7 @@ fi
 
 set -o vi
 
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 # source /usr/share/gazebo/setup.bash
 
 # source the user_workspace, if it exists
