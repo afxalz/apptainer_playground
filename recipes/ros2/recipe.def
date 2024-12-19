@@ -17,8 +17,11 @@ From: ros:humble
       gdb \
       git \
       ros-humble-backward-ros \
-      tmux
- 
+      ros-humble-rqt-graph \
+      tmux \
+      python3-pip
+
+
     export CUSTOM_LOCATION=/opt/env/
     mkdir -p $CUSTOM_LOCATION
 
