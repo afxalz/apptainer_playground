@@ -26,8 +26,8 @@ MOUNT_PATH="$CUSTOM_APPTAINER_PATH/mount"
 # use <file>.sif for normal container
 # use <folder>/ for sandbox container
 if [ -z "$2" ]; then
-  CONTAINER_NAME="ros2_jazzy.sif"
-  OVERLAY_NAME="ros2_jazzy.img"
+  CONTAINER_NAME="ros2_humble.sif"
+  OVERLAY_NAME="ros2_humble.img"
 else
   CONTAINER_NAME=$2".sif"
   OVERLAY_NAME=$2".img"
@@ -53,6 +53,7 @@ MOUNTS=(
 
   # mount the MRS shell additions into the container, DO NOT MODIFY
   "type=bind" "$MOUNT_PATH" "/opt/env/host"
+  "type=bind" "$HOME/.zshrc" "/opt/env/host/custom_configs/zsh/dot_zshrc"
 
   # mount folders to facilitate Xserver piping
   # "type=bind" "/tmp/.X11-unix" "/tmp/.X11-unix"
