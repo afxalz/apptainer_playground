@@ -138,10 +138,15 @@ fi
 # fi
 
 # some other tii ROS2 shit
-export ROS_LOCALHOST_ONLY=1
+# export ROS_LOCALHOST_ONLY=1
 export DRONE_DEVICE_ID=drone01
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-export FASTRTPS_DEFAULT_PROFILES_FILE=/opt/env/host/ros2/DEFAULT_FASTRTPS_PROFILES.xml
+# export FASTRTPS_DEFAULT_PROFILES_FILE=/opt/env/host/ros2/DEFAULT_FASTRTPS_PROFILES.xml
+export FASTDDS_DEFAULT_PROFILES_FILE=/opt/env/host/ros2/DEFAULT_FASTRTPS_PROFILES_FW.xml
 
 alias clbt='colcon build --packages-up-to $(basename `pwd`)'
-alias clb='colcon build --symlink-install'
+alias clb='colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo'
+export SIMULATION=1
+export DRONE_DEVICE_ID=fixedwing1
+export DEVICE_TYPE=fixedwing
+export LIMITED_RANGE_SIM=true 

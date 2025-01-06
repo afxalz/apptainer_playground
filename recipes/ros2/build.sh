@@ -5,4 +5,4 @@ THIS_PATH=`dirname "$0"`
 REPO_PATH=`( cd "$THIS_PATH/../.." && pwd )`
 THIS_PATH=`( cd "$THIS_PATH" && pwd )`
 
-singularity build --fakeroot --fix-perms -F $REPO_PATH/images/ros2_jazzy.sif $THIS_PATH/recipe.def
+apptainer build --fakeroot --fix-perms -F $REPO_PATH/images/ros2_humble.sif $THIS_PATH/recipe.def
