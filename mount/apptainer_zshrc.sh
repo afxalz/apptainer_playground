@@ -1,27 +1,22 @@
 export SHELL=$( which zsh )
 
-PROMPT='[MRS Apptainer]%1~ %# '
+PROMPT='[Apptainer]%1~ %# '
 
-source /opt/ros/noetic/setup.zsh
+# ROS2 env-varibles
+source /opt/ros/humble/setup.bash
+export ROS_LOCALHOST_ONLY=1
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+export FASTDDS_DEFAULT_PROFILES_FILE=/opt/env/host/ros2/DEFAULT_FASTRTPS_PROFILES_FW.xml
+
+alias clbt='colcon build --packages-up-to $(basename `pwd`)'
+alias clb='colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo'
 
 # source the user_workspace, if it exists
-[ -e ~/user_ros_workspace/devel/setup.zsh ] && source ~/user_ros_workspace/devel/setup.zsh
-
-[ -z "$ROS_PORT" ] && export ROS_PORT=11311
-[ -z "$ROS_MASTER_URI" ] && export ROS_MASTER_URI=http://localhost:$ROS_PORT
-
-export ROS_WORKSPACES="$ROS_WORKSPACES ~/user_ros_workspace"
-
-# if host pc is not Ubuntu 20.04
-OS_INFO=$(cat /proc/version)
-if ! ([[ "$OS_INFO" == *"Ubuntu"* ]] && [[ "$OS_INFO" == *"20.04"* ]]); then
-  export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
-  source /usr/share/gazebo/setup.bash
-fi
+[ -e ~/user_ros_workspace/install/setup.zsh ] && source ~/user_ros_workspace/install/setup.zsh
 
 # source the linux setup from within
-if [ -e /opt/klaxalk/git/linux-setup/appconfig/zsh/dotzshrc ]; then
+if [ -e /opt/env/host/custom_configs/zsh/dotzshrc ]; then
 
-  source /opt/klaxalk/git/linux-setup/appconfig/zsh/dotzshrc
+  source /opt/env/host/custom_configs/zsh/dotzshrc
 
 fi

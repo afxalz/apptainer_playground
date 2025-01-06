@@ -1,11 +1,10 @@
 Bootstrap: docker
-From: ros:jazzy
+From: ros:humble
 
 %post
 
     apt -y update
     apt -y install \
-      ament-cmake \
       ros-humble-geographic-msgs \
       ros-humble-geometry-msgs \
       ros-humble-tf2-geometry-msgs \
@@ -19,7 +18,9 @@ From: ros:jazzy
       ros-humble-backward-ros \
       ros-humble-rqt-graph \
       tmux \
-      python3-pip
+      python3-pip \
+      bat \
+      tmuxinator
 
 
 # directory to store env config files
