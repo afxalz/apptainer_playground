@@ -53,7 +53,6 @@ MOUNTS=(
 
   # mount the MRS shell additions into the container, DO NOT MODIFY
   "type=bind" "$MOUNT_PATH" "/opt/env/host"
-  "type=bind" "$HOME/.zshrc" "/opt/env/host/custom_configs/zsh/dot_zshrc"
 
   # mount folders to facilitate Xserver piping
   # "type=bind" "/tmp/.X11-unix" "/tmp/.X11-unix"
