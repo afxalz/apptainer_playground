@@ -1,6 +1,18 @@
 export SHELL=$( which zsh )
 
+# some more ls aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
 
+if [ -e /opt/env/host/config/dotzshrc ]; then
+
+  source /opt/env/host/config/dotzshrc
+
+fi
+
+# prefix the shell prompt with Apptainer
+PROMPT='[Apptainer]'$PROMPT
 
 # ROS2 env-varibles
 source /opt/ros/humble/setup.zsh
@@ -13,20 +25,4 @@ alias clb='colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=RelWit
 
 # source the user_workspace, if it exists
 [ -e ~/user_ros_workspace/install/setup.zsh ] && source ~/user_ros_workspace/install/setup.zsh
-
-if [ -e /opt/env/host/config/dotzshrc ]; then
-
-  source /opt/env/host/config/dotzshrc
-
-fi
-
-# set variable identifying the chroot you work in (used in the prompt below)
-if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
-    debian_chroot=$(cat /etc/debian_chroot)
-fi
-
-# some more ls aliases
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
-PROMPT='[Apptainer]'$PROMPT
+[ -e ~/user_ros_workspace/src/mrs_ros_pkgs/install/setup.zsh ] && source ~/user_ros_workspace/src/mrs_ros_pkgs/install/setup.zsh
