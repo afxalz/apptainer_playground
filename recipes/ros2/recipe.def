@@ -23,7 +23,8 @@ From: ros:humble
     tmuxinator \
     fonts-powerline \
     zsh \
-    curl
+    curl \
+    whiptail
 
   # install Oh-my-Zsh
   export ZSH=/opt/oh-my-zsh && sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
