@@ -25,4 +25,4 @@ alias clb='colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=RelWit
 
 # source the user_workspace, if it exists
 [ -e ~/user_ros_workspace/install/setup.zsh ] && source ~/user_ros_workspace/install/setup.zsh
-[ -e ~/user_ros_workspace/src/mrs_ros_pkgs/install/setup.zsh ] && source ~/user_ros_workspace/src/mrs_ros_pkgs/install/setup.zsh
+[ -e ~/user_ros_workspace/src/mrs_ros2_ws/install/setup.zsh ] && source ~/user_ros_workspace/src/mrs_ros2_ws/install/setup.zsh
