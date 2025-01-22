@@ -1,22 +1,22 @@
 Bootstrap: docker
-From: ros:humble
+From: ros:jazzy
 
 %post
 
   apt -y update
   apt -y install \
-    ros-humble-geographic-msgs \
-    ros-humble-geometry-msgs \
-    ros-humble-tf2-geometry-msgs \
-    ros-humble-std-msgs \
-    ros-humble-nav-msgs \
+    ros-jazzy-geographic-msgs \
+    ros-jazzy-geometry-msgs \
+    ros-jazzy-tf2-geometry-msgs \
+    ros-jazzy-std-msgs \
+    ros-jazzy-nav-msgs \
     libboost-all-dev \
     iputils-ping \
     iproute2 \
     gdb \
     git \
-    ros-humble-backward-ros \
-    ros-humble-rqt-graph \
+    ros-jazzy-backward-ros \
+    ros-jazzy-rqt-graph \
     tmux \
     python3-pip \
     bat \
