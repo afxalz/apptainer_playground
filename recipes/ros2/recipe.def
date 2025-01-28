@@ -24,7 +24,8 @@ From: ros:jazzy
     fonts-powerline \
     zsh \
     curl \
-    whiptail
+    whiptail \
+    libeigen3-dev
 
   # install Oh-my-Zsh
   export ZSH=/opt/oh-my-zsh && sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"

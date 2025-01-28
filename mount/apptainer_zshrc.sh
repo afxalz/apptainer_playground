@@ -16,7 +16,8 @@ PROMPT='[Apptainer]'$PROMPT
 
 # ROS2 env-varibles
 source /opt/ros/jazzy/setup.zsh
-export ROS_LOCALHOST_ONLY=1
+export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+export ROS_STATIC_PEERS=''
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 export FASTDDS_DEFAULT_PROFILES_FILE=/opt/env/host/ros2/DEFAULT_FASTRTPS_PROFILES_FW.xml
 
