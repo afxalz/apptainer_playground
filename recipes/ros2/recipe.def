@@ -10,6 +10,8 @@ From: ros:jazzy
     ros-jazzy-tf2-geometry-msgs \
     ros-jazzy-std-msgs \
     ros-jazzy-nav-msgs \
+    ros-jazzy-tf2 \
+    ros-jazzy-fastcdr \
     libboost-all-dev \
     iputils-ping \
     iproute2 \
