@@ -91,7 +91,7 @@ else
 fi
 
 if $CONTAINED; then
-  CONTAINED_ARG="--home /tmp/apptainer/home:/home/$USER --no-mount cwd"
+  CONTAINED_ARG="--home /tmp/apptainer_playground/home:/home/$USER --no-mount cwd"
   $DEBUG && echo "Debug: running as contained"
 else
   CONTAINED_ARG=""
