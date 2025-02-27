@@ -27,7 +27,8 @@ From: ros:jazzy
     zsh \
     curl \
     whiptail \
-    libeigen3-dev
+    libeigen3-dev \
+    libopencv-dev
 
   # install Oh-my-Zsh
   export ZSH=/opt/oh-my-zsh && sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
