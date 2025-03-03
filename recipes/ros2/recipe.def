@@ -28,7 +28,11 @@ From: ros:jazzy
     curl \
     whiptail \
     libeigen3-dev \
-    libopencv-dev
+    libopencv-dev \
+    ros-jazzy-image-transport \
+    ros-jazzy-cv-bridge \
+    ros-jazzy-sensor-msgs \
+    ros-jazzy-rqt-*
 
   # install Oh-my-Zsh
   export ZSH=/opt/oh-my-zsh && sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
