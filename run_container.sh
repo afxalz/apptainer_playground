@@ -10,8 +10,8 @@ trap 'echo "$0: \"${last_command}\" command failed with exit code $?"' ERR
 # Change the following paths when moving the script and the folders around
 
 # get the path to the current directory
-CUSTOM_APPTAINER_PATH=`dirname "$0"`
-CUSTOM_APPTAINER_PATH=`( cd "$CUSTOM_APPTAINER_PATH" && pwd )`
+CUSTOM_APPTAINER_PATH=$(dirname "$0")
+CUSTOM_APPTAINER_PATH=$(cd "$CUSTOM_APPTAINER_PATH" && pwd)
 
 # alternatively, set it directly
 # CUSTOM_APPTAINER_PATH=$HOME/git/mrs_apptainer
@@ -26,11 +26,12 @@ MOUNT_PATH="$CUSTOM_APPTAINER_PATH/mount"
 # use <file>.sif for normal container
 # use <folder>/ for sandbox container
 if [ -z "$2" ]; then
-  CONTAINER_NAME="ros2_jazzy.sif"
+  # CONTAINER_NAME="ros2_jazzy.sif"
+  CONTAINER_NAME="ros1_noetic.sif"
   OVERLAY_NAME="ros2_jazzy.img"
 else
-  CONTAINER_NAME=$2".sif"
-  OVERLAY_NAME=$2".img"
+  CONTAINER_NAME=$2
+  OVERLAY_NAME=$2
 fi
 
 CONTAINED=true  # true: will isolate from the HOST's home
@@ -49,7 +50,7 @@ FAKEROOT=false # true: emulate root inside the container
 MOUNTS=(
   # mount the custom user workspace into the container
   #           HOST PATH                                  CONTAINER PATH
-  "type=bind" "$CUSTOM_APPTAINER_PATH/user_ros_workspace" "/home/$USER/user_ros_workspace"
+  "type=bind" "$CUSTOM_APPTAINER_PATH/workspaces" "/home/$USER/workspaces"
 
   # mount the MRS shell additions into the container, DO NOT MODIFY
   "type=bind" "$MOUNT_PATH" "/opt/env/host"
