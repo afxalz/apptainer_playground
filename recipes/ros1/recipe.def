@@ -1,0 +1,51 @@
+Bootstrap: docker
+From: ros:noetic
+
+%post
+  export DEBIAN_FRONTEND=noninteractive
+
+  apt -y update
+  apt -y install \
+    dialog \
+    ros-noetic-geometry-msgs \
+    ros-noetic-std-msgs \
+    ros-noetic-nav-msgs \
+    ros-noetic-tf2 \
+    ros-noetic-sensor-msgs \
+    ros-noetic-rqt-* \
+    iproute2 \
+    gdb \
+    git \
+    tmux \
+    python3-pip \
+    bat \
+    tmuxinator \
+    fonts-powerline \
+    zsh \
+    curl \
+
+  # install Oh-my-Zsh
+  export ZSH=/opt/oh-my-zsh && sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+# directory to store env config files
+  export CUSTOM_LOCATION=/opt/env/
+  mkdir -p $CUSTOM_LOCATION
+
+# link the env file (will be mounted at runtime) to the default env file
+# file in /.singularity.d/env/99-env.sh are sourced at startup
+  ln -s $CUSTOM_LOCATION/host/99-env.sh /.singularity.d/env/99-env.sh
+
+%environment
+  export LC_ALL=C
+  export LANG=en_US.UTF-8
+
+%runscript
+  CMD="${@}"
+
+  if [ -z "${CMD}" ]; then
+    /bin/zsh --login
+  else
+    /bin/zsh --login -c "${CMD}"
+  fi
+
+  exit 0
