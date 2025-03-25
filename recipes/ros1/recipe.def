@@ -5,34 +5,46 @@ From: ros:noetic
   export DEBIAN_FRONTEND=noninteractive
 
   apt -y update
+
+  apt-get -y install sudo
   apt -y install \
     dialog \
-    ros-noetic-geometry-msgs \
-    ros-noetic-std-msgs \
-    ros-noetic-nav-msgs \
-    ros-noetic-tf2 \
-    ros-noetic-sensor-msgs \
     ros-noetic-rqt-* \
     iproute2 \
     gdb \
     git \
     tmux \
-    python3-pip \
     bat \
     tmuxinator \
     fonts-powerline \
     zsh \
     curl \
+    python3-pip \
+    iputils-ping
+
+  pip install gitman
+
+  # download special fonts
+  cd /usr/share/fonts && \
+  curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/FiraCode.zip && \
+  unzip FiraCode.zip
+
+  # intall prompt manager for zsh
+  curl -sS https://starship.rs/install.sh | sh
 
   # install Oh-my-Zsh
   export ZSH=/opt/oh-my-zsh && sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-# directory to store env config files
+  # install the MRS UAV System
+  curl https://ctu-mrs.github.io/ppa-stable/add_ppa.sh | bash
+  apt-get -y install ros-noetic-mrs-uav-system-full
+
+  # directory to store env config files
   export CUSTOM_LOCATION=/opt/env/
   mkdir -p $CUSTOM_LOCATION
 
-# link the env file (will be mounted at runtime) to the default env file
-# file in /.singularity.d/env/99-env.sh are sourced at startup
+  # link the env file (will be mounted at runtime) to the default env file
+  # file in /.singularity.d/env/99-env.sh are sourced at startup
   ln -s $CUSTOM_LOCATION/host/99-env.sh /.singularity.d/env/99-env.sh
 
 %environment
