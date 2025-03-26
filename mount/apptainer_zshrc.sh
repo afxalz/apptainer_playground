@@ -5,8 +5,10 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 
-if [ -e /opt/env/host/config/dotzshrc ]; then
-  source /opt/env/host/config/dotzshrc
+CUSTOM_ENV=/opt/env/host
+
+if [ -e $CUSTOM_ENV/config/dotzshrc ]; then
+  source $CUSTOM_ENV/config/dotzshrc
 fi
 
 source /opt/ros/${ROS_DISTRO}/setup.zsh
@@ -17,6 +19,9 @@ ros2_jazzy_env() {
   export ROS_STATIC_PEERS=''
   export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
   export FASTDDS_DEFAULT_PROFILES_FILE=/opt/env/host/ros2/DEFAULT_FASTRTPS_PROFILES_FW.xml
+
+  colcon mixin add mrs file://$CUSTOM_ENV/ros2/colcon/index.yaml > /dev/null
+  colcon mixin update mrs > /dev/null
 
   alias clbt='colcon build --packages-up-to $(basename `pwd`)'
   alias clb='colcon build'

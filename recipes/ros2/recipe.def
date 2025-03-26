@@ -2,8 +2,11 @@ Bootstrap: docker
 From: ros:jazzy
 
 %post
+  export DEBIAN_FRONTEND=noninteractive
 
   apt -y update
+
+  apt-get -y install sudo
   apt -y install \
     ros-jazzy-geographic-msgs \
     ros-jazzy-geometry-msgs \
@@ -26,7 +29,7 @@ From: ros:jazzy
     fonts-powerline \
     zsh \
     curl \
-    whiptail \
+    dialog \
     libeigen3-dev \
     libopencv-dev \
     ros-jazzy-image-transport \
@@ -34,11 +37,14 @@ From: ros:jazzy
     ros-jazzy-sensor-msgs \
     ros-jazzy-rqt-*
 
+  # intall prompt manager for zsh
+  curl -sS https://starship.rs/install.sh | sh -s -- -y
+
   # install Oh-my-Zsh
   export ZSH=/opt/oh-my-zsh && sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 # directory to store env config files
-  export CUSTOM_LOCATION=/opt/env/
+  export CUSTOM_LOCATION=/opt/env
   mkdir -p $CUSTOM_LOCATION
 
 # link the env file (will be mounted at runtime) to the default env file
