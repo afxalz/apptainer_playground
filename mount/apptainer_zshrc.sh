@@ -34,7 +34,6 @@ ros1_noetic_env() {
 
   # source the user_workspace, if it exists
   [ -e ~/workspaces/indair_ws/devel/setup.zsh ] && source ~/workspaces/indair_ws/devel/setup.zsh
-  # [ -e ~/workspaces/indair/devel/setup.zsh ] && source ~/workspaces/indair/devel/setup.zsh
 }
 
 if [[ "$ROS_DISTRO" =~ "noetic" ]]; then
@@ -46,6 +45,5 @@ fi
 echo -e "Sourced ROS-$ROS_DISTRO env"
 
 # prefix the shell prompt with Apptainer
-PROMPT=$PROMPT'[Apptainer]'
 export STARSHIP_CONFIG=/opt/env/host/config/starship.toml
 eval "$(starship init zsh)"
