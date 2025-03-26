@@ -26,8 +26,8 @@ MOUNT_PATH="$CUSTOM_APPTAINER_PATH/mount"
 # use <file>.sif for normal container
 # use <folder>/ for sandbox container
 if [ -z "$2" ]; then
-  # CONTAINER_NAME="ros2_jazzy.sif"
-  CONTAINER_NAME="ros1_noetic.sif"
+  CONTAINER_NAME="ros2_jazzy.sif"
+  # CONTAINER_NAME="ros1_noetic.sif"
   OVERLAY_NAME="ros2_jazzy.img"
 else
   CONTAINER_NAME=$2
