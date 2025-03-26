@@ -9,9 +9,6 @@ if [ -e /opt/env/host/config/dotzshrc ]; then
   source /opt/env/host/config/dotzshrc
 fi
 
-# prefix the shell prompt with Apptainer
-PROMPT=$PROMPT'[Apptainer]'
-
 source /opt/ros/${ROS_DISTRO}/setup.zsh
 
 ros2_jazzy_env() {
@@ -47,3 +44,8 @@ if [[ "$ROS_DISTRO" =~ "jazzy" ]]; then
   ros2_jazzy_env
 fi
 echo -e "Sourced ROS-$ROS_DISTRO env"
+
+# prefix the shell prompt with Apptainer
+PROMPT=$PROMPT'[Apptainer]'
+export STARSHIP_CONFIG=/opt/env/host/config/starship.toml
+eval "$(starship init zsh)"

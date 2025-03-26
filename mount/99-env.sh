@@ -4,7 +4,6 @@ CUSTOM_LOCATION=/opt/env
 
 # link bash and zsh rc files
 [ ! -e ~/.zshrc ] && ln -s $CUSTOM_LOCATION/host/apptainer_zshrc.sh ~/.zshrc
-[ ! -e ~/.config/starship.toml ] && ln -s $CUSTOM_LOCATION/host/config/starship.toml ~/.config/starship.toml
 
 # [ ! -e ~/.vim ] && ln -s $CUSTOM_LOCATION/host/configs/dotvim ~/.vim
 
