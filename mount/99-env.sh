@@ -14,4 +14,3 @@ CUSTOM_LOCATION=/opt/env
 [ ! -d ~/.oh-my-zsh ] && ln -s /opt/oh-my-zsh ~/.oh-my-zsh
 
 # touch ~/.sudo_as_admin_successful
-# export PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\][Apptainer]\$ "
