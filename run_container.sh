@@ -26,8 +26,8 @@ MOUNT_PATH="$CUSTOM_APPTAINER_PATH/mount"
 # use <file>.sif for normal container
 # use <folder>/ for sandbox container
 if [ -z "$2" ]; then
-  # CONTAINER_NAME="ros2_jazzy.sif"
-  CONTAINER_NAME="node_js.sif"
+  CONTAINER_NAME="ros2_jazzy.sif"
+  # CONTAINER_NAME="node_js.sif"
   # CONTAINER_NAME="ros1_noetic.sif"
   OVERLAY_NAME="ros2_jazzy.img"
 else
@@ -51,10 +51,14 @@ FAKEROOT=false # true: emulate root inside the container
 MOUNTS=(
   # mount the custom user workspace into the container
   #           HOST PATH                                  CONTAINER PATH
-  "type=bind" "$CUSTOM_APPTAINER_PATH/workspaces" "/home/$USER/workspaces"
+  "type=bind" "$CUSTOM_APPTAINER_PATH/workspaces" "$HOME/workspaces"
 
-  # mount the MRS shell additions into the container, DO NOT MODIFY
-  "type=bind" "$MOUNT_PATH" "/opt/env/host"
+  "type=bind" "$MOUNT_PATH" "/opt/env/host/apptainer_config/"
+
+  "type=bind" "$HOME/.zshrc" "/opt/env/host/config/dot_zshrc"
+  "type=bind" "$HOME/.tmux-themepack" "/opt/env/host/config/dot_tmux-themepack"
+  "type=bind" "$HOME/.tmux.conf" "/opt/env/host/config/dot_tmux.conf"
+  "type=bind" "$HOME/.config/starship.toml" "/opt/env/host/config/dot_config/starship.toml"
 
   # mount folders to facilitate Xserver piping
   # "type=bind" "/tmp/.X11-unix" "/tmp/.X11-unix"
