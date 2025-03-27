@@ -52,7 +52,6 @@ From: ros:jazzy
   ln -s $CUSTOM_LOCATION/host/99-env.sh /.singularity.d/env/99-env.sh
 
 %environment
-  export LC_ALL=C
   export LANG=en_US.UTF-8
 
 %runscript
