@@ -5,10 +5,10 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 
-CUSTOM_ENV=/opt/env/host
+CUSTOM_ENV=/opt/env/host/config
 
-if [ -e $CUSTOM_ENV/config/dotzshrc ]; then
-  source $CUSTOM_ENV/config/dotzshrc
+if [ -e $CUSTOM_ENV/dot_zshrc ]; then
+  source $CUSTOM_ENV/dot_zshrc 
 fi
 
 source /opt/ros/${ROS_DISTRO}/setup.zsh
@@ -20,7 +20,7 @@ ros2_jazzy_env() {
   export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
   export FASTDDS_DEFAULT_PROFILES_FILE=/opt/env/host/ros2/DEFAULT_FASTRTPS_PROFILES_FW.xml
 
-  colcon mixin add mrs file://$CUSTOM_ENV/ros2/colcon/index.yaml > /dev/null
+  colcon mixin add mrs file:///opt/env/host/apptainer_config/ros2/colcon/index.yaml > /dev/null
   colcon mixin update mrs > /dev/null
 
   alias clbt='colcon build --packages-up-to $(basename `pwd`)'
@@ -50,5 +50,5 @@ fi
 echo -e "Sourced ROS-$ROS_DISTRO env"
 
 # prefix the shell prompt with Apptainer
-export STARSHIP_CONFIG=/opt/env/host/config/starship.toml
+export STARSHIP_CONFIG=$CUSTOM_ENV/dot_config/starship.toml
 eval "$(starship init zsh)"

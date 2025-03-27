@@ -40,7 +40,7 @@ From: ros:noetic
 
   # link the env file (will be mounted at runtime) to the default env file
   # file in /.singularity.d/env/99-env.sh are sourced at startup
-  ln -s $CUSTOM_LOCATION/host/99-env.sh /.singularity.d/env/99-env.sh
+  ln -s $CUSTOM_LOCATION/host/apptainer_config/99-env.sh /.singularity.d/env/99-env.sh
 
 %environment
   export LANG=en_US.UTF-8

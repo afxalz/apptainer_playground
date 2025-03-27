@@ -26,7 +26,7 @@ From: node:22.14.0-bullseye
 
   # link the env file (will be mounted at runtime) to the default env file
   # file in /.singularity.d/env/99-env.sh are sourced at startup
-  ln -s $CUSTOM_LOCATION/host/99-env.sh /.singularity.d/env/99-env.sh
+  ln -s $CUSTOM_LOCATION/host/apptainer_config/99-env.sh /.singularity.d/env/99-env.sh
 
   # PUT THE CUSTOM COMMANDS HERE
   curl https://raw.githubusercontent.com/creationix/nvm/v0.40.1/install.sh | bash
