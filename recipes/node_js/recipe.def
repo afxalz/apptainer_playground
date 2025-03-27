@@ -32,7 +32,6 @@ From: node:22.14.0-bullseye
   curl https://raw.githubusercontent.com/creationix/nvm/v0.40.1/install.sh | bash
 
 %environment
-  export LC_ALL=C
   export LANG=en_US.UTF-8
 
 %runscript
