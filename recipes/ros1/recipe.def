@@ -32,7 +32,13 @@ From: ros:noetic
 
   # install the MRS UAV System
   curl https://ctu-mrs.github.io/ppa-stable/add_ppa.sh | bash
-  apt-get -y install ros-noetic-mrs-uav-system-full
+  apt-get -y install \
+    ros-noetic-mrs-uav-system-full
+  
+  wget -q https://raw.githubusercontent.com/mavlink/mavros/master/mavros/scripts/install_geographiclib_datasets.sh && \
+  chmod +x install_geographiclib_datasets.sh && \
+  sudo ./install_geographiclib_datasets.sh
+
 
   # directory to store env config files
   export CUSTOM_LOCATION=/opt/env
