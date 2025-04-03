@@ -5,7 +5,7 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 
-CUSTOM_ENV=/opt/env/host/config
+CUSTOM_ENV=/opt/env/host/dot_config
 
 if [ -e $CUSTOM_ENV/dot_zshrc ]; then
   source $CUSTOM_ENV/dot_zshrc 
@@ -28,6 +28,7 @@ ros2_jazzy_env() {
   # source the user_workspace, if it exists
   # [ -e ~/user_ros_workspace/install/setup.zsh ] && source ~/user_ros_workspace/install/setup.zsh
   # [ -e ~/user_ros_workspace/src/mrs_ros2_ws/install/setup.zsh ] && source ~/user_ros_workspace/src/mrs_ros2_ws/install/setup.zsh
+  [ -e ~/workspaces/mrs_ros2_ws/install/setup.zsh ] && source ~/workspaces/mrs_ros2_ws/install/setup.zsh
 }
 
 ros1_noetic_env() {
@@ -38,7 +39,8 @@ ros1_noetic_env() {
   alias clb='catkin build'
 
   # source the user_workspace, if it exists
-  [ -e ~/workspaces/indair_ws/devel/setup.zsh ] && source ~/workspaces/indair_ws/devel/setup.zsh
+  # [ -e ~/workspaces/indair_ws/devel/setup.zsh ] && source ~/workspaces/indair_ws/devel/setup.zsh
+  [ -e ~/workspaces/training_sim_ws/devel/setup.zsh ] && source ~/workspaces/training_sim_ws/devel/setup.zsh
 }
 
 if [[ "$ROS_DISTRO" =~ "noetic" ]]; then
@@ -50,5 +52,5 @@ fi
 echo -e "Sourced ROS-$ROS_DISTRO env"
 
 # prefix the shell prompt with Apptainer
-export STARSHIP_CONFIG=$CUSTOM_ENV/dot_config/starship.toml
+export STARSHIP_CONFIG=$CUSTOM_ENV/starship.toml
 eval "$(starship init zsh)"

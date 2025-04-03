@@ -39,7 +39,6 @@ From: ros:noetic
   chmod +x install_geographiclib_datasets.sh && \
   sudo ./install_geographiclib_datasets.sh
 
-
   # directory to store env config files
   export CUSTOM_LOCATION=/opt/env
   mkdir -p $CUSTOM_LOCATION
