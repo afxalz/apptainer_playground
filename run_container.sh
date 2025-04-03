@@ -26,23 +26,24 @@ MOUNT_PATH="$CUSTOM_APPTAINER_PATH/mount"
 # use <file>.sif for normal container
 # use <folder>/ for sandbox container
 if [ -z "$2" ]; then
-  CONTAINER_NAME="ros2_jazzy.sif"
+  # CONTAINER_NAME="ros2_jazzy.sif"
   # CONTAINER_NAME="node_js.sif"
   # CONTAINER_NAME="ros1_noetic.sif"
+  CONTAINER_NAME="ros1_noetic"
   OVERLAY_NAME="ros2_jazzy.img"
 else
   CONTAINER_NAME=$2
   OVERLAY_NAME=$2
 fi
 
-CONTAINED=true  # true: will isolate from the HOST's home
+CONTAINED=true # true: will isolate from the HOST's home
 CLEAN_ENV=true # true: will clean the shell environment before runnning container
 
 USE_NVIDIA=false # true: will tell Apptainer that it should use nvidia graphics. Does not work every time.
 
 # the following are mutually exclusive
 OVERLAY=false  # true: will load persistant overlay (overlay can be created with scripts/create_overlay.sh)
-WRITABLE=false # true: will run it as --writable (works with --sandbox containers, image can be converted with scripts/convert_sandbox.sh)
+WRITABLE=true  # true: will run it as --writable (works with --sandbox containers, image can be converted with scripts/convert_sandbox.sh)
 FAKEROOT=false # true: emulate root inside the container
 
 # defines what should be mounted from the host to the container
@@ -55,10 +56,10 @@ MOUNTS=(
 
   "type=bind" "$MOUNT_PATH" "/opt/env/host/apptainer_config/"
 
-  "type=bind" "$HOME/.zshrc" "/opt/env/host/config/dot_zshrc"
-  "type=bind" "$HOME/.tmux-themepack" "/opt/env/host/config/dot_tmux-themepack"
-  "type=bind" "$HOME/.tmux.conf" "/opt/env/host/config/dot_tmux.conf"
-  "type=bind" "$HOME/.config/starship.toml" "/opt/env/host/config/dot_config/starship.toml"
+  "type=bind" "$HOME/.zshrc" "/opt/env/host/dot_config/dot_zshrc"
+  "type=bind" "$HOME/.tmux-themepack" "/opt/env/host/dot_config/dot_tmux-themepack"
+  "type=bind" "$HOME/.tmux.conf" "/opt/env/host/dot_config/dot_tmux.conf"
+  "type=bind" "$HOME/.config/starship.toml" "/opt/env/host/dot_config/starship.toml"
 
   # mount folders to facilitate Xserver piping
   # "type=bind" "/tmp/.X11-unix" "/tmp/.X11-unix"
@@ -154,35 +155,47 @@ else
   EXEC_CMD="eval"
 fi
 
+if $WRITABLE; then
+  mkdir -p $CONTAINER_PATH/opt/env/host/dot_config || exit 1
+fi
+
 MOUNT_ARG=""
-if ! $WRITABLE; then
+# if ! $WRITABLE; then
 
-  # prepare the mounting points, resolve the full paths
-  for ((i=0; i < ${#MOUNTS[*]}; i++));
-  do
-    ((i%3==0)) && TYPE[$i/3]="${MOUNTS[$i]}"
-    ((i%3==1)) && SOURCE[$i/3]="${MOUNTS[$i]}"
-    ((i%3==2)) && DESTINATION[$i/3]="${MOUNTS[$i]}"
-  done
+# prepare the mounting points, resolve the full paths
+for ((i = 0; i < ${#MOUNTS[*]}; i++)); do
+  ((i % 3 == 0)) && TYPE[$i / 3]="${MOUNTS[$i]}"
+  ((i % 3 == 1)) && SOURCE[$i / 3]="${MOUNTS[$i]}"
+  ((i % 3 == 2)) && DESTINATION[$i / 3]="${MOUNTS[$i]}"
+done
 
-  for ((i=0; i < ${#TYPE[*]}; i++)); do
+for ((i = 0; i < ${#TYPE[*]}; i++)); do
 
-    if test -e ${SOURCE[$i]}; then
+  if test -e ${SOURCE[$i]}; then
 
-      FULL_SOURCE=$( realpath -e ${SOURCE[$i]} )
-      FULL_DESTINATION=$( realpath -m ${DESTINATION[$i]} )
+    FULL_SOURCE=$(realpath -e ${SOURCE[$i]})
+    FULL_DESTINATION=$(realpath -m ${DESTINATION[$i]})
 
-      MOUNT_ARG="$MOUNT_ARG --mount ${TYPE[$i]},source=$FULL_SOURCE,destination=$FULL_DESTINATION"
+    MOUNT_ARG="$MOUNT_ARG --mount ${TYPE[$i]},source=$FULL_SOURCE,destination=$FULL_DESTINATION"
 
-    else
-
-      echo "Error while mounting '${SOURCE[$i]}', the path does not exist".
-
+    if $WRITABLE; then
+      if [[ -d "$FULL_SOURCE" ]]; then
+        mkdir -p $CONTAINER_PATH$FULL_DESTINATION || exit 1
+      fi
+      if [[ -f "$FULL_SOURCE" ]]; then
+        touch $CONTAINER_PATH$FULL_DESTINATION || exit 1
+      fi
     fi
 
-  done
+  else
 
-fi
+    echo "Error while mounting '${SOURCE[$i]}', the path does not exist".
+
+  fi
+
+done
+
+# fi
 
 if [[ "$ACTION" == "run" ]]; then
   [ ! -z "$@" ] && shift
@@ -204,7 +217,7 @@ fi
 # this will set $DISPLAY in the container to the same value as on your host machine
 export APPTAINERENV_DISPLAY=$DISPLAY
 
-xhost + > /dev/null 2>&1
+xhost + >/dev/null 2>&1
 
 $EXEC_CMD apptainer $ACTION \
   $NVIDIA_ARG \
@@ -219,4 +232,4 @@ $EXEC_CMD apptainer $ACTION \
   $CONTAINER_PATH \
   $CMD
 
-xhost - > /dev/null 2>&1
+xhost - >/dev/null 2>&1

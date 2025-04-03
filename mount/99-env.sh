@@ -11,7 +11,7 @@ CUSTOM_LOCATION=/opt/env
 # [ ! -e ~/.vimrc ] && ln -s $CUSTOM_LOCATION/host/config/dotvimrc ~/.vimrc
 
 # link tmux conf
-[ ! -e ~/.tmux-themepack ] && ln -s $CUSTOM_LOCATION/host/config/dot_tmux-themepack ~/.tmux-themepack
-[ ! -e ~/.tmux.conf ] && ln -s $CUSTOM_LOCATION/host/config/dot_tmux.conf ~/.tmux.conf
+[ ! -e ~/.tmux-themepack ] && ln -s $CUSTOM_LOCATION/host/dot_config/dot_tmux-themepack ~/.tmux-themepack
+[ ! -e ~/.tmux.conf ] && ln -s $CUSTOM_LOCATION/host/dot_config/dot_tmux.conf ~/.tmux.conf
 
 # touch ~/.sudo_as_admin_successful
