@@ -1,6 +1,28 @@
 #!/bin/bash
 
-set -e
+# Enable errexit, nounset, and pipefail
+# The script will exit if any command (even piped) fails or a variable is not set
+set -o errexit
+set -o nounset
+set -o pipefail
+
+# Define menu options
+OPTIONS=(1 "ros1_noetic"
+  2 "ros2_jazzy"
+  3 "node_js")
+
+# Display the menu and capture the user's choice
+# Display a form dialog with multiple input fields
+exec 3>&1
+CHOICE=$(dialog --clear \
+  --backtitle "containers" \
+  --menu "Choose the image to run" \
+  10 40 5 \
+  "${OPTIONS[@]}" \
+  2>&1 1>&3)
+exec 3>&-
+
+exit 0
 
 trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
 trap 'echo "$0: \"${last_command}\" command failed with exit code $?"' ERR
@@ -26,10 +48,10 @@ MOUNT_PATH="$CUSTOM_APPTAINER_PATH/mount"
 # use <file>.sif for normal container
 # use <folder>/ for sandbox container
 if [ -z "$2" ]; then
-  # CONTAINER_NAME="ros2_jazzy.sif"
+  CONTAINER_NAME="ros2_jazzy.sif"
   # CONTAINER_NAME="node_js.sif"
   # CONTAINER_NAME="ros1_noetic.sif"
-  CONTAINER_NAME="ros1_noetic"
+  # CONTAINER_NAME="ros1_noetic"
   OVERLAY_NAME="ros2_jazzy.img"
 else
   CONTAINER_NAME=$2
@@ -43,7 +65,7 @@ USE_NVIDIA=false # true: will tell Apptainer that it should use nvidia graphics.
 
 # the following are mutually exclusive
 OVERLAY=false  # true: will load persistant overlay (overlay can be created with scripts/create_overlay.sh)
-WRITABLE=true  # true: will run it as --writable (works with --sandbox containers, image can be converted with scripts/convert_sandbox.sh)
+WRITABLE=false # true: will run it as --writable (works with --sandbox containers, image can be converted with scripts/convert_sandbox.sh)
 FAKEROOT=false # true: emulate root inside the container
 
 # defines what should be mounted from the host to the container
