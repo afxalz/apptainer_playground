@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Exit the script if any command fails
 set -e
 
 # the traps make sure the script notifies the use which command has failed
@@ -9,7 +10,6 @@ trap 'echo "$0: \"${last_command}\" command failed with exit code $?"' ERR
 ## | ------------------- configure the paths ------------------ |
 
 # Change the following paths when moving the script and the folders around
-
 # get the path to the current directory
 CUSTOM_APPTAINER_PATH=$(dirname "$0")
 CUSTOM_APPTAINER_PATH=$(cd "$CUSTOM_APPTAINER_PATH" && pwd)
@@ -20,41 +20,43 @@ RECIPE_PATH="$CUSTOM_APPTAINER_PATH/recipes"
 OVERLAYS_PATH="$CUSTOM_APPTAINER_PATH/overlays"
 MOUNT_PATH="$CUSTOM_APPTAINER_PATH/mount"
 
+# get all the build scripts for the recipes
 RECIPES=$(find $RECIPE_PATH -name "build.sh")
 
-IMAGES=()
+# generate the list of possible images
+IMAGE_OPTIONS=()
+declare -A IMAGE_RECIPE_MAP
 count=1
 for path in $RECIPES; do
-  IMAGES+=($count "$(awk -F= '/^IMAGE_NAME=/ {print $2}' $path | tr -d '"')")
-  ((count+=2))
+  IMAGE_OPTIONS+=($count "$(awk -F= '/^IMAGE_NAME=/ {print $2}' $path | tr -d '"')")
+  IMAGE_RECIPE_MAP["$(awk -F= '/^IMAGE_NAME=/ {print $2}' $path | tr -d '"')"]="$path"
+  ((count += 2))
 done
 
-echo "${IMAGES[@]}"
-
-# Define menu options
-OPTIONS=("ros1_noetic" "ROS Noetic"
-  "ros2_jazzy" "ROS2 Jazzy"
-  "node_js" "Node JS")
-
 # Display the menu and capture the user's choice
-# Display a form dialog with multiple input fields
 exec 3>&1
-CHOICE=$(dialog --clear \
+CHOICE=$(dialog \
   --backtitle "containers" \
   --no-tags \
   --menu "Choose the image to run" \
   10 40 5 \
-  "${IMAGES[@]}" \
+  "${IMAGE_OPTIONS[@]}" \
   2>&1 1>&3)
 exec 3>&-
+
+clear
+# build the image if it does not exist
+if ! [[ -f "$IMAGES_PATH/${IMAGE_OPTIONS[$CHOICE]}.sif" ]]; then
+  cd "$(dirname ${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]})" && source ${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]}
+fi
 
 ## | ----------------------- user config ---------------------- |
 
 # use <file>.sif for normal container
 # use <folder>/ for sandbox container
 if [ -z "$2" ]; then
-  CONTAINER_NAME="${IMAGES[$CHOICE]}.sif"
-  OVERLAY_NAME="${IMAGES[$CHOICE]}.img"
+  CONTAINER_NAME="${IMAGE_OPTIONS[$CHOICE]}.sif"
+  OVERLAY_NAME="${IMAGE_OPTIONS[$CHOICE]}.img"
 else
   CONTAINER_NAME=$2
   OVERLAY_NAME=$2
@@ -78,17 +80,19 @@ MOUNTS=(
   #           HOST PATH                                  CONTAINER PATH
   "type=bind" "$CUSTOM_APPTAINER_PATH/workspaces" "$HOME/workspaces"
 
+  # this dir stores custom config only used for the apptainer containers
   "type=bind" "$MOUNT_PATH" "/opt/env/host/apptainer_config/"
 
+  # use the shell config of the user inside the container
   "type=bind" "$HOME/.zshrc" "/opt/env/host/dot_config/dot_zshrc"
   "type=bind" "$HOME/.tmux-themepack" "/opt/env/host/dot_config/dot_tmux-themepack"
   "type=bind" "$HOME/.tmux.conf" "/opt/env/host/dot_config/dot_tmux.conf"
   "type=bind" "$HOME/.config/starship.toml" "/opt/env/host/dot_config/starship.toml"
 
   # mount folders to facilitate Xserver piping
-  # "type=bind" "/tmp/.X11-unix" "/tmp/.X11-unix"
-  # "type=bind" "/dev/dri" "/dev/dri"
-  # "type=bind" "$HOME/.Xauthority" "/home/$USER/.Xauthority"
+  "type=bind" "/tmp/.X11-unix" "/tmp/.X11-unix"
+  "type=bind" "/dev/dri" "/dev/dri"
+  "type=bind" "$HOME/.Xauthority" "/home/$USER/.Xauthority"
 )
 
 ## | ------------------ advanced user config ------------------ |
@@ -184,8 +188,6 @@ if $WRITABLE; then
 fi
 
 MOUNT_ARG=""
-# if ! $WRITABLE; then
-
 # prepare the mounting points, resolve the full paths
 for ((i = 0; i < ${#MOUNTS[*]}; i++)); do
   ((i % 3 == 0)) && TYPE[$i / 3]="${MOUNTS[$i]}"
@@ -202,6 +204,7 @@ for ((i = 0; i < ${#TYPE[*]}; i++)); do
 
     MOUNT_ARG="$MOUNT_ARG --mount ${TYPE[$i]},source=$FULL_SOURCE,destination=$FULL_DESTINATION"
 
+    # create empty files and directories when writable (not needed when the image is not writable)
     if $WRITABLE; then
       if [[ -d "$FULL_SOURCE" ]]; then
         mkdir -p $CONTAINER_PATH$FULL_DESTINATION || exit 1
@@ -212,9 +215,7 @@ for ((i = 0; i < ${#TYPE[*]}; i++)); do
     fi
 
   else
-
     echo "Error while mounting '${SOURCE[$i]}', the path does not exist".
-
   fi
 
 done
@@ -241,7 +242,7 @@ fi
 # this will set $DISPLAY in the container to the same value as on your host machine
 export APPTAINERENV_DISPLAY=$DISPLAY
 
-xhost + >/dev/null 2>&1
+xhost +local:$USER >/dev/null 2>&1
 
 $EXEC_CMD apptainer $ACTION \
   $NVIDIA_ARG \
@@ -256,4 +257,4 @@ $EXEC_CMD apptainer $ACTION \
   $CONTAINER_PATH \
   $CMD
 
-xhost - >/dev/null 2>&1
+xhost -local:$USER >/dev/null 2>&1
