@@ -1,29 +1,8 @@
 #!/bin/bash
 
-# Enable errexit, nounset, and pipefail
-# The script will exit if any command (even piped) fails or a variable is not set
-set -o errexit
-set -o nounset
-set -o pipefail
+set -e
 
-# Define menu options
-OPTIONS=(1 "ros1_noetic"
-  2 "ros2_jazzy"
-  3 "node_js")
-
-# Display the menu and capture the user's choice
-# Display a form dialog with multiple input fields
-exec 3>&1
-CHOICE=$(dialog --clear \
-  --backtitle "containers" \
-  --menu "Choose the image to run" \
-  10 40 5 \
-  "${OPTIONS[@]}" \
-  2>&1 1>&3)
-exec 3>&-
-
-exit 0
-
+# the traps make sure the script notifies the use which command has failed
 trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
 trap 'echo "$0: \"${last_command}\" command failed with exit code $?"' ERR
 
@@ -35,24 +14,47 @@ trap 'echo "$0: \"${last_command}\" command failed with exit code $?"' ERR
 CUSTOM_APPTAINER_PATH=$(dirname "$0")
 CUSTOM_APPTAINER_PATH=$(cd "$CUSTOM_APPTAINER_PATH" && pwd)
 
-# alternatively, set it directly
-# CUSTOM_APPTAINER_PATH=$HOME/git/mrs_apptainer
-
 # define paths to the subfolders
 IMAGES_PATH="$CUSTOM_APPTAINER_PATH/images"
+RECIPE_PATH="$CUSTOM_APPTAINER_PATH/recipes"
 OVERLAYS_PATH="$CUSTOM_APPTAINER_PATH/overlays"
 MOUNT_PATH="$CUSTOM_APPTAINER_PATH/mount"
+
+RECIPES=$(find $RECIPE_PATH -name "build.sh")
+
+IMAGES=()
+count=1
+for path in $RECIPES; do
+  IMAGES+=($count "$(awk -F= '/^IMAGE_NAME=/ {print $2}' $path | tr -d '"')")
+  ((count+=2))
+done
+
+echo "${IMAGES[@]}"
+
+# Define menu options
+OPTIONS=("ros1_noetic" "ROS Noetic"
+  "ros2_jazzy" "ROS2 Jazzy"
+  "node_js" "Node JS")
+
+# Display the menu and capture the user's choice
+# Display a form dialog with multiple input fields
+exec 3>&1
+CHOICE=$(dialog --clear \
+  --backtitle "containers" \
+  --no-tags \
+  --menu "Choose the image to run" \
+  10 40 5 \
+  "${IMAGES[@]}" \
+  2>&1 1>&3)
+exec 3>&-
 
 ## | ----------------------- user config ---------------------- |
 
 # use <file>.sif for normal container
 # use <folder>/ for sandbox container
 if [ -z "$2" ]; then
-  CONTAINER_NAME="ros2_jazzy.sif"
-  # CONTAINER_NAME="node_js.sif"
-  # CONTAINER_NAME="ros1_noetic.sif"
-  # CONTAINER_NAME="ros1_noetic"
-  OVERLAY_NAME="ros2_jazzy.img"
+  CONTAINER_NAME="${IMAGES[$CHOICE]}.sif"
+  OVERLAY_NAME="${IMAGES[$CHOICE]}.img"
 else
   CONTAINER_NAME=$2
   OVERLAY_NAME=$2
