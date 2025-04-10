@@ -36,8 +36,9 @@ done
 # Display the menu and capture the user's choice
 exec 3>&1
 CHOICE=$(dialog \
-  --backtitle "containers" \
+  --backtitle "Run Apptainer" \
   --no-tags \
+  --title "Images" \
   --menu "Choose the image to run" \
   10 40 5 \
   "${IMAGE_OPTIONS[@]}" \
