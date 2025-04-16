@@ -11,14 +11,14 @@ trap 'echo "$0: \"${last_command}\" command failed with exit code $?"' ERR
 
 # Change the following paths when moving the script and the folders around
 # get the path to the current directory
-CUSTOM_APPTAINER_PATH=$(dirname "$0")
-CUSTOM_APPTAINER_PATH=$(cd "$CUSTOM_APPTAINER_PATH" && pwd)
+APPTAINER_PATH=$(dirname "$0")
+APPTAINER_PATH=$(cd "$APPTAINER_PATH" && pwd)
 
 # define paths to the subfolders
-IMAGES_PATH="$CUSTOM_APPTAINER_PATH/images"
-RECIPE_PATH="$CUSTOM_APPTAINER_PATH/recipes"
-OVERLAYS_PATH="$CUSTOM_APPTAINER_PATH/overlays"
-MOUNT_PATH="$CUSTOM_APPTAINER_PATH/mount"
+IMAGES_PATH="$APPTAINER_PATH/images"
+RECIPE_PATH="$APPTAINER_PATH/recipes"
+OVERLAYS_PATH="$APPTAINER_PATH/overlays"
+MOUNT_PATH="$APPTAINER_PATH/mount"
 
 # get all the build scripts for the recipes
 RECIPES=$(find $RECIPE_PATH -name "build.sh")
@@ -51,10 +51,8 @@ if ! [[ -f "$IMAGES_PATH/${IMAGE_OPTIONS[$CHOICE]}.sif" ]]; then
   cd "$(dirname ${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]})" && source ${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]}
 fi
 
-## | ----------------------- user config ---------------------- |
-
 # use <file>.sif for normal container
-# use <folder>/ for sandbox container
+# TODO: use <folder>/ for sandbox container
 if [ -z "$2" ]; then
   CONTAINER_NAME="${IMAGE_OPTIONS[$CHOICE]}.sif"
   OVERLAY_NAME="${IMAGE_OPTIONS[$CHOICE]}.img"
@@ -76,25 +74,31 @@ FAKEROOT=false # true: emulate root inside the container
 # defines what should be mounted from the host to the container
 # [TYPE], [SOURCE (host)], [DESTINATION (container)]
 # - !!! the folders are not being mounted when running with sudo
-MOUNTS=(
-  # mount the custom user workspace into the container
-  #           HOST PATH                                  CONTAINER PATH
-  "type=bind" "$CUSTOM_APPTAINER_PATH/workspaces" "$HOME/workspaces"
+# MOUNTS=(
+#   # mount the custom user workspace into the container
+#   #           HOST PATH                                  CONTAINER PATH
+#   "type=bind" "$APPTAINER_PATH/workspaces" "$HOME/workspaces"
 
-  # this dir stores custom config only used for the apptainer containers
-  "type=bind" "$MOUNT_PATH" "/opt/env/host/apptainer_config/"
+#   # this dir stores custom config only used for the apptainer containers
+#   "type=bind" "$MOUNT_PATH" "/opt/env/host/apptainer_config/"
 
-  # use the shell config of the user inside the container
-  "type=bind" "$HOME/.zshrc" "/opt/env/host/dot_config/dot_zshrc"
-  "type=bind" "$HOME/.tmux-themepack" "/opt/env/host/dot_config/dot_tmux-themepack"
-  "type=bind" "$HOME/.tmux.conf" "/opt/env/host/dot_config/dot_tmux.conf"
-  "type=bind" "$HOME/.config/starship.toml" "/opt/env/host/dot_config/starship.toml"
+#   # use the shell config of the user inside the container
+#   "type=bind" "$HOME/.zshrc" "/opt/env/host/dot_config/dot_zshrc"
+#   "type=bind" "$HOME/.tmux-themepack" "/opt/env/host/dot_config/dot_tmux-themepack"
+#   "type=bind" "$HOME/.tmux.conf" "/opt/env/host/dot_config/dot_tmux.conf"
+#   "type=bind" "$HOME/.config/starship.toml" "/opt/env/host/dot_config/starship.toml"
 
-  # mount folders to facilitate Xserver piping
-  "type=bind" "/tmp/.X11-unix" "/tmp/.X11-unix"
-  "type=bind" "/dev/dri" "/dev/dri"
-  "type=bind" "$HOME/.Xauthority" "/home/$USER/.Xauthority"
-)
+#   # mount folders to facilitate Xserver piping
+#   "type=bind" "/tmp/.X11-unix" "/tmp/.X11-unix"
+#   "type=bind" "/dev/dri" "/dev/dri"
+#   "type=bind" "$HOME/.Xauthority" "/home/$USER/.Xauthority"
+# )
+
+MOUNTS=()
+mapfile -t kv_lines < <(yq -r '.bind | to_entries | .[] | ""\(.key)" "\(.value)""' "$MOUNT_PATH"/mounts.yaml)
+for line in "${kv_lines[@]}"; do
+  MOUNTS+=( "type=bind" "$line" )
+done
 
 ## | ------------------ advanced user config ------------------ |
 
