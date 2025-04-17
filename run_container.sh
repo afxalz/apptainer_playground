@@ -17,6 +17,10 @@ IMAGES_PATH="$APPTAINER_PATH/images"
 RECIPE_PATH="$APPTAINER_PATH/recipes"
 OVERLAYS_PATH="$APPTAINER_PATH/overlays"
 MOUNT_PATH="$APPTAINER_PATH/mount"
+# to store the configuration files from the host (e.g .zshrc, .tmux.conf etc.)
+CONTAINER_ENV_HOST="/opt/env/host"
+# container $HOME changes depending on the use of --fakeroot or use of --no-home
+CONTAINER_HOME=$HOME
 
 # get all the build scripts for the recipes
 RECIPES=$(find $RECIPE_PATH -name "build.sh")
@@ -73,40 +77,33 @@ else
 
   # build the image if it does not exist
   if ! [[ -f "$IMAGES_PATH/${IMAGE_OPTIONS[$CHOICE]}.sif" ]]; then
-    cd "$(dirname ${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]})" && source ${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]}
+    clear && cd "$(dirname ${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]})" && source ${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]}
   fi
 
   # create an overlay if it does not exist
   if [[ $OVERLAY_CHOICE =~ "1" && ! -f "$OVERLAYS_PATH/${IMAGE_OPTIONS[$CHOICE]}.img" ]]; then
-    apptainer overlay create --size 2048 "$OVERLAYS_PATH/${IMAGE_OPTIONS[$CHOICE]}".img
+    clear && apptainer overlay create --size 2048 "$OVERLAYS_PATH/${IMAGE_OPTIONS[$CHOICE]}".img
   fi
 
   # use <file>.sif for normal container
-  # TODO: use <folder>/ for sandbox container
   CONTAINER_NAME="${IMAGE_OPTIONS[$CHOICE]}.sif"
   OVERLAY_NAME="${IMAGE_OPTIONS[$CHOICE]}.img"
 fi
 
 # prepare the options for Apptainer
 
-# each container has a unique home and tmp when running in a contained form
-UNIQUE_DIR=$(mktemp -d /tmp/apptainer/"$CONTAINER_NAME".XXXX)
-mkdir -p "$UNIQUE_DIR"/tmp
-mkdir -p "$UNIQUE_DIR"/home
-
 CONTAINED=true # true: will isolate from the HOST's home
 CLEAN_ENV=true # true: will clean the shell environment before runnning container
-
 USE_NVIDIA=false # true: will tell Apptainer that it should use nvidia graphics. Does not work every time.
-
 # the following are mutually exclusive
 OVERLAY=false  # true: will load persistant overlay (overlay can be created with scripts/create_overlay.sh)
 WRITABLE=false # true: will run it as --writable (works with --sandbox containers, image can be converted with scripts/convert_sandbox.sh)
 FAKEROOT=false # true: emulate root inside the container
 
 if [[ $OVERLAY_CHOICE =~ "1" ]]; then
-  OVERLAY=true # true: will load persistant overlay (overlay can be created with scripts/create_overlay.sh)
-  FAKEROOT=true # true: emulate root inside the container
+  OVERLAY=true           # true: will load persistant overlay (overlay can be created with scripts/create_overlay.sh)
+  FAKEROOT=true          # true: emulate root inside the container
+  CONTAINER_HOME="/root" # $HOME=/root when running with --fakeroot
 fi
 
 # defines what should be mounted from the host to the container
@@ -115,21 +112,21 @@ fi
 MOUNTS=(
   # mount the custom user workspace into the container
   #           HOST PATH                                  CONTAINER PATH
-  "type=bind" "$APPTAINER_PATH/workspaces" "$HOME/workspaces"
+  "type=bind" "$APPTAINER_PATH/workspaces" "$CONTAINER_HOME/workspaces"
 
-  # this dir stores custom config only used for the apptainer containers
-  "type=bind" "$MOUNT_PATH" "/opt/env/host/apptainer_config/"
+  # this dir stCONFIGcustom config only used for the apptainer containers
+  "type=bind" "$MOUNT_PATH" "$CONTAINER_ENV_HOST/apptainer_config/"
 
   # use the shell config of the user inside the container
-  "type=bind" "$HOME/.zshrc" "/opt/env/host/dot_config/dot_zshrc"
-  "type=bind" "$HOME/.tmux-themepack" "/opt/env/host/dot_config/dot_tmux-themepack"
-  "type=bind" "$HOME/.tmux.conf" "/opt/env/host/dot_config/dot_tmux.conf"
-  "type=bind" "$HOME/.config/starship.toml" "/opt/env/host/dot_config/starship.toml"
+  "type=bind" "$HOME/.zshrc" "$CONTAINER_ENV_HOST/dot_config/dot_zshrc"
+  "type=bind" "$HOME/.tmux-themepack" "$CONTAINER_ENV_HOST/dot_config/dot_tmux-themepack"
+  "type=bind" "$HOME/.tmux.conf" "$CONTAINER_ENV_HOST/dot_config/dot_tmux.conf"
+  "type=bind" "$HOME/.config/starship.toml" "$CONTAINER_ENV_HOST/dot_config/starship.toml"
 
   # mount folders to facilitate Xserver piping
   "type=bind" "/tmp/.X11-unix" "/tmp/.X11-unix"
   "type=bind" "/dev/dri" "/dev/dri"
-  "type=bind" "$HOME/.Xauthority" "/home/$USER/.Xauthority"
+  "type=bind" "$HOME/.Xauthority" "$CONTAINER_HOME/.Xauthority"
 )
 
 # not supposed to be changed by a normal user
@@ -156,7 +153,7 @@ fi
 
 if $CONTAINED; then
   # mount unique home and tmp to run multiple instances of the same image
-  CONTAINED_ARG="--no-mount tmp,home,cwd --bind $UNIQUE_DIR/home:/home/$USER,$UNIQUE_DIR/tmp:/tmp"
+  CONTAINED_ARG="--containall"
   $DEBUG && echo "Debug: running as contained"
 else
   CONTAINED_ARG=""
