@@ -8,31 +8,44 @@ trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
 trap 'echo "$0: \"${last_command}\" command failed with exit code $?"' ERR
 
 # install pkgs needed for cool shell visualizations
-sudo apt install -y \
+apt-get install -y -q \
     toilet \
     dialog
 
-toilet "Removing old version of Docker"
-for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do apt remove $pkg; done
+toilet -w 200 -f smblock "Removing old version of Docker"
+
+DOCKER_DEPS=(
+    docker.io
+    docker-doc
+    docker-compose
+    docker-compose-v2
+    podman-docker
+    containerd
+    runc
+)
+
+for pkg in $DOCKER_DEPS; do
+    apt-get -q -y purge $pkg || true
+done
 
 toilet "Adding Docker's official GPG key"
-apt update
-apt install -y \
+apt-get update
+apt-get install -y \
     ca-certificates \
     curl
-apt install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-chmod a+r /etc/apt/keyrings/docker.asc
+apt-get install -m 0755 -d /etc/apt-get/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt-get/keyrings/docker.asc
+chmod a+r /etc/apt-get/keyrings/docker.asc
 
 toilet "Adding Docker's the repository to Apt sources"
 echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt-get/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
   $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" |
-    tee /etc/apt/sources.list.d/docker.list >/dev/null
-apt update -y
+    tee /etc/apt-get/sources.list.d/docker.list >/dev/null
+apt-get update -y
 
 toilet "Installing Docker"
-apt install -y \
+apt-get install -y \
     docker-ce \
     docker-ce-cli \
     containerd.io \
@@ -46,9 +59,9 @@ usermod -a -G docker "$USER" && newgrp docker
 docker run hello-world
 
 toilet "Removing existing Apptainer installation"
-apt purge apptainer
+apt-get purge apptainer
 
 toilet "Installing 'apptainer-1.3.8' with fixes for non-root build"
-apt install -y wget
+apt-get install -y wget
 cd /tmp && wget https://github.com/apptainer/apptainer/releases/download/v1.3.6/apptainer_1.3.6_amd64.deb
-apt install -y ./apptainer_1.3.6_amd64.deb
+apt-get install -y ./apptainer_1.3.6_amd64.deb
