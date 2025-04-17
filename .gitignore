@@ -1,6 +1,4 @@
 *.swp
 *.swo
 *.sif
-images/*
 mount/config/tmux-themepack
-overlays/*
