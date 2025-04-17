@@ -40,10 +40,9 @@ if [[ "$1" =~ "--cli" ]]; then
   fi
 
   if [ -z "$3" ]; then
-    echo "Please provide 'image-name.sif/overlay-name.img' to use $ACTION in Apptainer" && exit
+    echo "Please provide 'image-name.sif' to use $ACTION in Apptainer" && exit
   else
     CONTAINER_NAME="$3.sif"
-    OVERLAY_NAME="$3.img"
   fi
 else
   # Display the menu and capture the user's choice
@@ -51,7 +50,7 @@ else
   CHOICE=$(dialog \
     --backtitle "Run Apptainer" \
     --no-tags \
-    --title "Images" \
+    --title "Images (SIF)" \
     --menu "Choose the image to run" \
     10 40 5 \
     "${IMAGE_OPTIONS[@]}" \
@@ -59,9 +58,27 @@ else
   exec 3>&-
 
   clear
+
+  exec 3>&1
+  OVERLAY_CHOICE=$(dialog \
+    --backtitle "Run Apptainer" \
+    --no-tags \
+    --title "Mode" \
+    --menu "Choose the mode to run" \
+    10 40 5 \
+    1 "WRITABLE" \
+    2 "READ-ONLY" \
+    2>&1 1>&3)
+  exec 3>&-
+
   # build the image if it does not exist
   if ! [[ -f "$IMAGES_PATH/${IMAGE_OPTIONS[$CHOICE]}.sif" ]]; then
     cd "$(dirname ${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]})" && source ${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]}
+  fi
+
+  # create an overlay if it does not exist
+  if [[ $OVERLAY_CHOICE =~ "1" && ! -f "$OVERLAYS_PATH/${IMAGE_OPTIONS[$CHOICE]}.img" ]]; then
+    apptainer overlay create --size 2048 "$OVERLAYS_PATH/${IMAGE_OPTIONS[$CHOICE]}".img
   fi
 
   # use <file>.sif for normal container
@@ -86,6 +103,11 @@ USE_NVIDIA=false # true: will tell Apptainer that it should use nvidia graphics.
 OVERLAY=false  # true: will load persistant overlay (overlay can be created with scripts/create_overlay.sh)
 WRITABLE=false # true: will run it as --writable (works with --sandbox containers, image can be converted with scripts/convert_sandbox.sh)
 FAKEROOT=false # true: emulate root inside the container
+
+if [[ $OVERLAY_CHOICE =~ "1" ]]; then
+  OVERLAY=true # true: will load persistant overlay (overlay can be created with scripts/create_overlay.sh)
+  FAKEROOT=true # true: emulate root inside the container
+fi
 
 # defines what should be mounted from the host to the container
 # [TYPE], [SOURCE (host)], [DESTINATION (container)]
@@ -133,7 +155,7 @@ else
 fi
 
 if $CONTAINED; then
-  # CONTAINED_ARG="--home $UNIQUE_DIR/home:/home/$USER --no-mount cwd"
+  # mount unique home and tmp to run multiple instances of the same image
   CONTAINED_ARG="--no-mount tmp,home,cwd --bind $UNIQUE_DIR/home:/home/$USER,$UNIQUE_DIR/tmp:/tmp"
   $DEBUG && echo "Debug: running as contained"
 else
