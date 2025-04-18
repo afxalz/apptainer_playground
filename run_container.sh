@@ -23,15 +23,15 @@ CONTAINER_ENV_HOST="/opt/env/host"
 CONTAINER_HOME=$HOME
 
 # get all the build scripts for the recipes
-RECIPES=$(find $RECIPE_PATH -name "build.sh")
+RECIPES=$(find "$RECIPE_PATH" -name "build.sh")
 
 # generate the list of possible images
 IMAGE_OPTIONS=()
 declare -A IMAGE_RECIPE_MAP
 count=1
 for path in $RECIPES; do
-  IMAGE_OPTIONS+=($count "$(awk -F= '/^IMAGE_NAME=/ {print $2}' $path | tr -d '"')")
-  IMAGE_RECIPE_MAP["$(awk -F= '/^IMAGE_NAME=/ {print $2}' $path | tr -d '"')"]="$path"
+  IMAGE_OPTIONS+=($count "$(awk -F= '/^IMAGE_NAME=/ {print $2}' "$path" | tr -d '"')")
+  IMAGE_RECIPE_MAP["$(awk -F= '/^IMAGE_NAME=/ {print $2}' "$path" | tr -d '"')"]="$path"
   ((count += 2))
 done
 
@@ -64,7 +64,7 @@ else
   clear
 
   exec 3>&1
-  OVERLAY_CHOICE=$(dialog \
+  MODE_CHOICE=$(dialog \
     --backtitle "Run Apptainer" \
     --no-tags \
     --title "Mode" \
@@ -76,34 +76,38 @@ else
   exec 3>&-
 
   # build the image if it does not exist
-  if ! [[ -f "$IMAGES_PATH/${IMAGE_OPTIONS[$CHOICE]}.sif" ]]; then
-    clear && cd "$(dirname ${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]})" && source ${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]}
+  if [[ $MODE_CHOICE =~ "2" ]]; then
+    CONTAINER_NAME="${IMAGE_OPTIONS[$CHOICE]}.sif"
+
+    if [[ ! -f "$IMAGES_PATH/${IMAGE_OPTIONS[$CHOICE]}.sif" ]]; then
+      clear && cd "$(dirname ${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]})" && source "${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]}"
+    fi
   fi
 
-  # create an overlay if it does not exist
-  if [[ $OVERLAY_CHOICE =~ "1" && ! -f "$OVERLAYS_PATH/${IMAGE_OPTIONS[$CHOICE]}.img" ]]; then
-    clear && apptainer overlay create --size 2048 "$OVERLAYS_PATH/${IMAGE_OPTIONS[$CHOICE]}".img
-  fi
+  if [[ $MODE_CHOICE =~ "1" ]]; then
+    CONTAINER_NAME="${IMAGE_OPTIONS[$CHOICE]}/"
 
-  # use <file>.sif for normal container
-  CONTAINER_NAME="${IMAGE_OPTIONS[$CHOICE]}.sif"
-  OVERLAY_NAME="${IMAGE_OPTIONS[$CHOICE]}.img"
+    if [[ ! -d "$IMAGES_PATH/${IMAGE_OPTIONS[$CHOICE]}/" ]]; then
+      clear && cd "$(dirname "${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]}")" && source "${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]}" sandbox
+    fi
+  fi
 fi
 
 # prepare the options for Apptainer
 
-CONTAINED=true # true: will isolate from the HOST's home
-CLEAN_ENV=true # true: will clean the shell environment before runnning container
+CONTAINED=true   # true: will isolate host $HOME /tmp and /var/tmp
+CLEAN_ENV=true   # true: will clean the shell environment before runnning container
 USE_NVIDIA=false # true: will tell Apptainer that it should use nvidia graphics. Does not work every time.
 # the following are mutually exclusive
 OVERLAY=false  # true: will load persistant overlay (overlay can be created with scripts/create_overlay.sh)
 WRITABLE=false # true: will run it as --writable (works with --sandbox containers, image can be converted with scripts/convert_sandbox.sh)
 FAKEROOT=false # true: emulate root inside the container
 
-if [[ $OVERLAY_CHOICE =~ "1" ]]; then
-  OVERLAY=true           # true: will load persistant overlay (overlay can be created with scripts/create_overlay.sh)
+if [[ $MODE_CHOICE =~ "1" ]]; then
+  WRITABLE=true          # true: will load persistant overlay (overlay can be created with scripts/create_overlay.sh)
   FAKEROOT=true          # true: emulate root inside the container
   CONTAINER_HOME="/root" # $HOME=/root when running with --fakeroot
+  CONTAINED=false # false: will isolate only host $HOME and $CWD
 fi
 
 # defines what should be mounted from the host to the container
@@ -140,7 +144,7 @@ CONTAINER_PATH=$IMAGES_PATH/$CONTAINER_NAME
 
 if $OVERLAY; then
 
-  if [ ! -e $OVERLAYS_PATH/$OVERLAY_NAME ]; then
+  if [ ! -e "$OVERLAYS_PATH"/"$OVERLAY_NAME" ]; then
     echo "Overlay file does not exist, initialize it with the 'create_fs_overlay.sh' script"
     exit 1
   fi
@@ -156,12 +160,11 @@ if $CONTAINED; then
   CONTAINED_ARG="--containall"
   $DEBUG && echo "Debug: running as contained"
 else
-  CONTAINED_ARG=""
+  CONTAINED_ARG="--no-mount home,cwd"
 fi
 
 if $WRITABLE; then
   WRITABLE_ARG="--writable"
-  FAKEROOT=true
   $DEBUG && echo "Debug: running as writable"
 else
   WRITABLE_ARG=""
@@ -201,8 +204,10 @@ else
   EXEC_CMD="eval"
 fi
 
+# create the directory to mount the host files
+# this is not needed in case of a read-only file system image.sif
 if $WRITABLE; then
-  mkdir -p $CONTAINER_PATH/opt/env/host/dot_config || exit 1
+  mkdir -p "$CONTAINER_PATH"/"$CONTAINER_ENV_HOST"/dot_config || exit 1
 fi
 
 MOUNT_ARG=""
