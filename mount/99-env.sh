@@ -1,17 +1,12 @@
 #!/bin/bash
 
-CUSTOM_LOCATION=/opt/env
+CONTAINER_ENV_HOST=/opt/env/host
 
 # link bash and zsh rc files
-[ ! -e ~/.zshrc ] && ln -s $CUSTOM_LOCATION/host/apptainer_config/apptainer_zshrc.sh ~/.zshrc
-[ ! -d ~/.oh-my-zsh ] && ln -s /opt/oh-my-zsh ~/.oh-my-zsh
-
-# [ ! -e ~/.vim ] && ln -s $CUSTOM_LOCATION/host/configs/dotvim ~/.vim
-
-# [ ! -e ~/.vimrc ] && ln -s $CUSTOM_LOCATION/host/config/dotvimrc ~/.vimrc
+[[ -f $CONTAINER_ENV_HOST/apptainer_config/apptainer_zshrc.sh ]] && ln -sf $CONTAINER_ENV_HOST/apptainer_config/apptainer_zshrc.sh ~/.zshrc
+[[ -d /opt/oh-my-zsh ]] && ln -sf /opt/oh-my-zsh ~/.oh-my-zsh
 
 # link tmux conf
-[ ! -e ~/.tmux-themepack ] && ln -s $CUSTOM_LOCATION/host/dot_config/dot_tmux-themepack ~/.tmux-themepack
-[ ! -e ~/.tmux.conf ] && ln -s $CUSTOM_LOCATION/host/dot_config/dot_tmux.conf ~/.tmux.conf
-
+[[ -d $CONTAINER_ENV_HOST/host/dot_config/dot_tmux-themepack ]] && ln -sf $CONTAINER_ENV_HOST/host/dot_config/dot_tmux-themepack ~/.tmux-themepack
+[[ -f $CONTAINER_ENV_HOST/host/dot_config/dot_tmux.conf ]] && ln -sf $CONTAINER_ENV_HOST/host/dot_config/dot_tmux.conf ~/.tmux.conf
 # touch ~/.sudo_as_admin_successful
