@@ -24,9 +24,21 @@ CONTAINER_HOME=$HOME
 
 # get all the build scripts for the recipes
 RECIPES=$(find "$RECIPE_PATH" -name "build.sh")
+IMAGES=$(cd "$IMAGES_PATH" && (ls | awk '{print $0}'))
+
+echo $IMAGES
 
 # generate the list of possible images
 IMAGE_OPTIONS=()
+count=1
+for image_name in $IMAGES; do
+  IMAGE_OPTIONS+=("$count" "$image_name")
+  ((count += 2))
+done
+
+echo "$IMAGE_OPTIONS"
+exit
+
 declare -A IMAGE_RECIPE_MAP
 count=1
 for path in $RECIPES; do
