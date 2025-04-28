@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Exit the script if any command fails
-set -e
+# set -e
 
 # the traps make sure the script notifies the use which command has failed
 trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
@@ -35,14 +35,13 @@ for image_name in $IMAGES; do
   IMAGE_OPTIONS+=("$count" "$image_name")
   ((count += 2))
 done
+IMAGE_OPTIONS+=("$count" "Create from recipe")
 
-echo "$IMAGE_OPTIONS"
-exit
-
+RECIPE_OPTIONS=()
 declare -A IMAGE_RECIPE_MAP
 count=1
 for path in $RECIPES; do
-  IMAGE_OPTIONS+=($count "$(awk -F= '/^IMAGE_NAME=/ {print $2}' "$path" | tr -d '"')")
+  RECIPE_OPTIONS+=("$count" "$(awk -F= '/^IMAGE_NAME=/ {print $2}' "$path" | tr -d '"')")
   IMAGE_RECIPE_MAP["$(awk -F= '/^IMAGE_NAME=/ {print $2}' "$path" | tr -d '"')"]="$path"
   ((count += 2))
 done
@@ -66,42 +65,81 @@ else
   CHOICE=$(dialog \
     --backtitle "Run Apptainer" \
     --no-tags \
-    --title "Images (SIF)" \
-    --menu "Choose the image to run" \
+    --title "Existing images (.sif is read-only)" \
+    --menu "Choose the image to run a container" \
     20 40 5 \
     "${IMAGE_OPTIONS[@]}" \
     2>&1 1>&3)
+
+  if [ $? -eq 1 ]; then
+    echo "Cancelled"
+    exit 1
+  fi
+
   exec 3>&-
 
   clear
 
-  exec 3>&1
-  MODE_CHOICE=$(dialog \
-    --backtitle "Run Apptainer" \
-    --no-tags \
-    --title "Mode" \
-    --menu "Choose the mode to run" \
-    10 40 5 \
-    1 "WRITABLE" \
-    2 "READ-ONLY" \
-    2>&1 1>&3)
-  exec 3>&-
+  if [[ "${IMAGE_OPTIONS[$CHOICE]}" =~ "Create" ]]; then
+    exec 3>&1
+    RECIPE_CHOICE=$(dialog \
+      --backtitle "Run Apptainer" \
+      --no-tags \
+      --title "Create an image" \
+      --menu "Choose the recipe" \
+      20 40 5 \
+      "${RECIPE_OPTIONS[@]}" \
+      2>&1 1>&3)
 
-  # build the image if it does not exist
-  if [[ $MODE_CHOICE =~ "2" ]]; then
-    CONTAINER_NAME="${IMAGE_OPTIONS[$CHOICE]}.sif"
-
-    if [[ ! -f "$IMAGES_PATH/${IMAGE_OPTIONS[$CHOICE]}.sif" ]]; then
-      clear && cd "$(dirname ${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]})" && source "${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]}"
+    if [ $? -eq 1 ]; then
+      echo "Cancelled"
+      exit 1
     fi
-  fi
 
-  if [[ $MODE_CHOICE =~ "1" ]]; then
-    CONTAINER_NAME="${IMAGE_OPTIONS[$CHOICE]}/"
+    exec 3>&-
 
-    if [[ ! -d "$IMAGES_PATH/${IMAGE_OPTIONS[$CHOICE]}/" ]]; then
-      clear && cd "$(dirname "${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]}")" && source "${IMAGE_RECIPE_MAP[${IMAGE_OPTIONS[$CHOICE]}]}" sandbox
+    clear
+
+    exec 3>&1
+    MODE_CHOICE=$(dialog \
+      --backtitle "Run Apptainer" \
+      --no-tags \
+      --title "Mode" \
+      --menu "Choose the mode to run" \
+      10 40 5 \
+      1 "WRITABLE" \
+      2 "READ-ONLY" \
+      2>&1 1>&3)
+
+    if [ $? -eq 1 ]; then
+      echo "Cancelled"
+      exit 1
     fi
+
+    exec 3>&-
+
+    # build the image if it does not exist
+    if [[ $MODE_CHOICE =~ "2" ]]; then
+      CONTAINER_NAME="${RECIPE_OPTIONS[$RECIPE_CHOICE]}.sif"
+
+      if [[ ! -f "$IMAGES_PATH/${RECIPE_OPTIONS[$RECIPE_CHOICE]}.sif" ]]; then
+        clear && cd "$(dirname ${IMAGE_RECIPE_MAP[${RECIPE_OPTIONS[$RECIPE_CHOICE]}]})" && source "${IMAGE_RECIPE_MAP[${RECIPE_OPTIONS[$RECIPE_CHOICE]}]}"
+      else
+        echo "Image already exist with the same name" || exit 1
+      fi
+    fi
+
+    if [[ $MODE_CHOICE =~ "1" ]]; then
+      CONTAINER_NAME="${RECIPE_OPTIONS[$RECIPE_CHOICE]}/"
+
+      if [[ ! -d "$IMAGES_PATH/${RECIPE_OPTIONS[$RECIPE_CHOICE]}/" ]]; then
+        clear && cd "$(dirname "${IMAGE_RECIPE_MAP[${RECIPE_OPTIONS[$RECIPE_CHOICE]}]}")" && source "${IMAGE_RECIPE_MAP[${RECIPE_OPTIONS[$RECIPE_CHOICE]}]}" sandbox
+      else
+        echo "Image already exist with the same name" || exit 1
+      fi
+    fi
+  else
+    CONTAINER_NAME="${IMAGE_OPTIONS[$CHOICE]}"
   fi
 fi
 clear
@@ -116,11 +154,11 @@ OVERLAY=false  # true: will load persistant overlay (overlay can be created with
 WRITABLE=false # true: will run it as --writable (works with --sandbox containers, image can be converted with scripts/convert_sandbox.sh)
 FAKEROOT=false # true: emulate root inside the container
 
-if [[ $MODE_CHOICE =~ "1" ]]; then
+if [[ ! "$CONTAINER_NAME" =~ ".sif" ]]; then
   WRITABLE=true          # true: will load persistant overlay (overlay can be created with scripts/create_overlay.sh)
   FAKEROOT=true          # true: emulate root inside the container
   CONTAINER_HOME="/root" # $HOME=/root when running with --fakeroot
-  CONTAINED=false # false: will isolate only host $HOME and $CWD
+  CONTAINED=false        # false: will isolate only host $HOME and $CWD
 fi
 
 # defines what should be mounted from the host to the container
