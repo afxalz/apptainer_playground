@@ -52,9 +52,9 @@ if [ -n "$force_color_prompt" ]; then
 fi
 
 if [ "$color_prompt" = yes ]; then
-    PS1='[MRS Apptainer] ${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+    PS1='[Apptainer] ${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 else
-    PS1='[MRS Apptainer] ${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+    PS1='[Apptainer] ${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
 fi
 unset color_prompt force_color_prompt
 
@@ -112,26 +112,68 @@ fi
 
 set -o vi
 
-source /opt/ros/noetic/setup.bash
-source /usr/share/gazebo/setup.bash
+CONTAINER_ENV_HOST=/opt/env/host
 
-# source the user_workspace, if it exists
-[ -e ~/user_ros_workspace/devel/setup.bash ] && source ~/user_ros_workspace/devel/setup.bash
+if [ -e $CONTAINER_ENV_HOST/dot_config/dot_bashrc]; then
+  source $CONTAINER_ENV_HOST/dot_config/dot_bashrc
+fi
 
-[ -z "$ROS_PORT" ] && export ROS_PORT=11311
-[ -z "$ROS_MASTER_URI" ] && export ROS_MASTER_URI=http://localhost:$ROS_PORT
+[[ -f /opt/ros/${ROS_DISTRO}/setup.zsh ]] && source /opt/ros/${ROS_DISTRO}/setup.zsh
 
-export ROS_WORKSPACES="$ROS_WORKSPACES ~/user_ros_workspace"
+ros2_jazzy_env() {
+  # ROS2 env-varibles
+  export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+  export ROS_STATIC_PEERS=''
+  export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+  export FASTDDS_DEFAULT_PROFILES_FILE=$CONTAINER_ENV_HOST/apptainer_config/ros2/DEFAULT_FASTRTPS_PROFILES_FW.xml
 
-# if host pc is not Ubuntu 20.04
-OS_INFO=$(cat /proc/version)
-if ! ([[ "$OS_INFO" == *"Ubuntu"* ]] && [[ "$OS_INFO" == *"20.04"* ]]); then
+  colcon mixin add mrs file://$CONTAINER_ENV_HOST/apptainer_config/ros2/colcon/index.yaml >/dev/null
+  colcon mixin update mrs >/dev/null
+
+  alias clbt='colcon build --packages-up-to $(basename `pwd`)'
+  alias clb='colcon build'
+  # source the user_workspace, if it exists
+#   [ -e ~/workspaces/mrs_ros2_ws/install/setup.zsh ] && source ~/workspaces/mrs_ros2_ws/install/setup.zsh
+}
+
+ros1_noetic_env() {
+  alias clbt='catkin bt'
+  alias clb='catkin build'
+  [ -z "$ROS_PORT" ] && export ROS_PORT=11311
+  [ -z "$ROS_MASTER_URI" ] && export ROS_MASTER_URI=http://localhost:$ROS_PORT
+  export ROS_WORKSPACES="$ROS_WORKSPACES ~/user_ros_workspace"
+
+  # if host pc is not Ubuntu 20.04
+  OS_INFO=$(cat /proc/version)
+  if ! ([[ "$OS_INFO" == *"Ubuntu"* ]] && [[ "$OS_INFO" == *"20.04"* ]]); then
     export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+    [[ -f /usr/share/gazebo/setup.bash ]] && source /usr/share/gazebo/setup.bash
+  fi
+
+  # source the user_workspace, if it exists
+  # [ -e ~/workspaces/indair_ws/devel/setup.zsh ] && source ~/workspaces/indair_ws/devel/setup.zsh
+  [ -e ~/workspaces/training_sim_ws/devel/setup.zsh ] && source ~/workspaces/training_sim_ws/devel/setup.zsh
+}
+
+if [[ "$ROS_DISTRO" =~ "noetic" ]]; then
+  ros1_noetic_env
+fi
+if [[ "$ROS_DISTRO" =~ "jazzy" ]]; then
+  ros2_jazzy_env
+fi
+echo -e "Sourced ROS-$ROS_DISTRO env"
+
+# prefix the shell prompt with Apptainer
+if [[ -f $CONTAINER_ENV_HOST/dot_config/starship.toml ]]; then
+  export STARSHIP_CONFIG=$CONTAINER_ENV_HOST/dot_config/starship.toml
+  eval "$(starship init zsh)"
+else
+  PROMPT='[Apptainer]%1~ %# '
 fi
 
 # source the linux setup from within
-if [ -e /opt/klaxalk/git/linux-setup/appconfig/bash/dotbashrc ]; then
+if [ -e /opt/klaxalk/git/linux-setup/appconfig/zsh/dotzshrc ]; then
 
-    source /opt/klaxalk/git/linux-setup/appconfig/bash/dotbashrc
+  source /opt/klaxalk/git/linux-setup/appconfig/zsh/dotzshrc
 
 fi

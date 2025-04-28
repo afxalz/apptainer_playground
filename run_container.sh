@@ -124,6 +124,8 @@ MOUNTS=(
 
   # use the shell config of the user inside the container
   "type=bind" "$HOME/.zshrc" "$CONTAINER_ENV_HOST/dot_config/dot_zshrc"
+  "type=bind" "$HOME/.bashrc" "$CONTAINER_ENV_HOST/dot_config/dot_bashrc"
+  "type=bind" "$HOME/.vimrc" "$CONTAINER_ENV_HOST/dot_config/dot_vimrc"
   "type=bind" "$HOME/.tmux-themepack" "$CONTAINER_ENV_HOST/dot_config/dot_tmux-themepack"
   "type=bind" "$HOME/.tmux.conf" "$CONTAINER_ENV_HOST/dot_config/dot_tmux.conf"
   "type=bind" "$HOME/.config/starship.toml" "$CONTAINER_ENV_HOST/dot_config/starship.toml"
