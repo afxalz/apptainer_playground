@@ -114,11 +114,11 @@ set -o vi
 
 CONTAINER_ENV_HOST=/opt/env/host
 
-if [ -e $CONTAINER_ENV_HOST/dot_config/dot_bashrc]; then
+if [ -e $CONTAINER_ENV_HOST/dot_config/dot_bashrc ]; then
   source $CONTAINER_ENV_HOST/dot_config/dot_bashrc
 fi
 
-[[ -f /opt/ros/${ROS_DISTRO}/setup.zsh ]] && source /opt/ros/${ROS_DISTRO}/setup.zsh
+[[ -f /opt/ros/${ROS_DISTRO}/setup.bash ]] && source /opt/ros/${ROS_DISTRO}/setup.bash 
 
 ros2_jazzy_env() {
   # ROS2 env-varibles
@@ -152,7 +152,7 @@ ros1_noetic_env() {
 
   # source the user_workspace, if it exists
   # [ -e ~/workspaces/indair_ws/devel/setup.zsh ] && source ~/workspaces/indair_ws/devel/setup.zsh
-  [ -e ~/workspaces/training_sim_ws/devel/setup.zsh ] && source ~/workspaces/training_sim_ws/devel/setup.zsh
+  [ -e ~/workspaces/training_sim_ws/devel/setup.bash ] && source ~/workspaces/training_sim_ws/devel/setup.bash
 }
 
 if [[ "$ROS_DISTRO" =~ "noetic" ]]; then
@@ -166,14 +166,14 @@ echo -e "Sourced ROS-$ROS_DISTRO env"
 # prefix the shell prompt with Apptainer
 if [[ -f $CONTAINER_ENV_HOST/dot_config/starship.toml ]]; then
   export STARSHIP_CONFIG=$CONTAINER_ENV_HOST/dot_config/starship.toml
-  eval "$(starship init zsh)"
+  eval "$(starship init bash)"
 else
   PROMPT='[Apptainer]%1~ %# '
 fi
 
 # source the linux setup from within
-if [ -e /opt/klaxalk/git/linux-setup/appconfig/zsh/dotzshrc ]; then
+if [ -e /opt/klaxalk/git/linux-setup/appconfig/bash/dotbashrc ]; then
 
-  source /opt/klaxalk/git/linux-setup/appconfig/zsh/dotzshrc
+  source /opt/klaxalk/git/linux-setup/appconfig/bash/dotzshrc
 
 fi
