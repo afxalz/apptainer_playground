@@ -1,4 +1,4 @@
-# MRS Apptainer
+# Apptainer Playground
 
 This repository provides a way to run the different software systems inside a [Apptainer](https://apptainer.org/) container.
 Apptainer allows you, an average user, to use software systems like the [MRS-UAV System](https://github.com/ctu-mrs/mrs_uav_system) without installing it into your local system and thus cluttering your OS with different software.
@@ -24,17 +24,11 @@ Apptainer allows you, an average user, to use software systems like the [MRS-UAV
 
 ## Installation
 
-MRS Apptainer will run on the following operating systems
-
 ### Linux (Ubuntu)
 
 * Install Apptainer - [install/install_apptainer.sh](./install/install_apptainer.sh).
 
-### Windows 11 with WSL 2.0
-
-TODO
-
-## Using MRS Apptainer
+## Using Apptainer Playground
 
 | **images**                                                           | **description**                                                                         |
 |----------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
