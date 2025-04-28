@@ -56,7 +56,7 @@ else
     --no-tags \
     --title "Images (SIF)" \
     --menu "Choose the image to run" \
-    10 40 5 \
+    20 40 5 \
     "${IMAGE_OPTIONS[@]}" \
     2>&1 1>&3)
   exec 3>&-
@@ -92,6 +92,7 @@ else
     fi
   fi
 fi
+clear
 
 # prepare the options for Apptainer
 

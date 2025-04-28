@@ -1,0 +1,32 @@
+Bootstrap: docker
+
+From: ctumrs/mrs_uav_system:latest
+
+%post
+
+    # git handy when cloning inside the container
+    sudo apt-get -y install git
+
+    # python virtual environment for setting up custom venvs
+    apt-get -y install python3-venv
+
+    # location for the apptainer files
+    export CONTAINER_ENV_HOST=/opt/env/host
+    mkdir -p $CONTAINER_ENV_HOST
+
+    # link configuration file for the MRS Apptainer
+    ln -s $CONTAINER_ENV_HOST/apptainer_config/99-env.sh /.singularity.d/env/99-env.sh
+
+%environment
+    export LC_ALL=C
+
+%runscript
+  CMD="${@}"
+
+  if [ -z "${CMD}" ]; then
+    /bin/bash --login
+  else
+    /bin/bash --login -c "${CMD}"
+  fi
+
+  exit 0
