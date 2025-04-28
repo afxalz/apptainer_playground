@@ -26,9 +26,7 @@ ros2_jazzy_env() {
   alias clbt='colcon build --packages-up-to $(basename `pwd`)'
   alias clb='colcon build'
   # source the user_workspace, if it exists
-  # [ -e ~/user_ros_workspace/install/setup.zsh ] && source ~/user_ros_workspace/install/setup.zsh
-  # [ -e ~/user_ros_workspace/src/mrs_ros2_ws/install/setup.zsh ] && source ~/user_ros_workspace/src/mrs_ros2_ws/install/setup.zsh
-  [ -e ~/workspaces/mrs_ros2_ws/install/setup.zsh ] && source ~/workspaces/mrs_ros2_ws/install/setup.zsh
+  # [ -e ~/workspaces/mrs_ros2_ws/install/setup.zsh ] && source ~/workspaces/mrs_ros2_ws/install/setup.zsh
 }
 
 ros1_noetic_env() {
@@ -63,7 +61,7 @@ if [[ -f $CONTAINER_ENV_HOST/dot_config/starship.toml ]]; then
   export STARSHIP_CONFIG=$CONTAINER_ENV_HOST/dot_config/starship.toml
   eval "$(starship init zsh)"
 else
-  PROMPT='[MRS Apptainer]%1~ %# '
+  PROMPT='[Apptainer]%1~ %# '
 fi
 
 # source the linux setup from within
