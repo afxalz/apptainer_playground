@@ -1,13 +1,13 @@
 # Apptainer Playground
 
-This repository provides a way to run the different software systems inside a [Apptainer](https://apptainer.org/) container.
-Apptainer allows you, an average user, to use software systems like the [MRS-UAV System](https://github.com/ctu-mrs/mrs_uav_system) without installing it into your local system and thus cluttering your OS with different software.
+This repository provides a way to run the different software systems inside an [Apptainer](https://apptainer.org/) container.
+Apptainer allows you, an average user, to use software systems like the [MRS-UAV System](https://github.com/ctu-mrs/mrs_uav_system) without installing it and the required dependencies into your local system and thus prevents cluttering your OS with different software.
 
 **Advantages of using Apptainer for development**
 
 * The container image won't change on its own and, therefore, will work and be compatible even when you update or reinstall your system.
-* The container image will run across different OS versions, e.g., with a ROS Noetic-based image on the 18.04 host system.
-* The container image can be backed up easily by copy-pasting a single file.
+* The container image will run across different OS versions, e.g., a ROS Noetic-based image on the 18.04 host system.
+* The container image can be backed up and shared easily by copy-pasting a single file.
 * The container image (sandboxed) can be altered and saved again, allowing you to store a particular configuration for later testing.
 
 **Why Apptainer and not just Docker?**
@@ -30,26 +30,44 @@ Apptainer allows you, an average user, to use software systems like the [MRS-UAV
 
 ## Using Apptainer Playground
 
-| **images**                                                           | **description**                                                                         |
+| **Exisiting Recipes**                                                           | **description**                                                                         |
 |----------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
 | mrs_system_docker | Installs the latest [MRS System Docker Image](https://hub.docker.com/r/ctumrs/mrs_uav_system/tags) |
 | mrs_system_apt    | Installs directly from the [MRS System stable PPA](https://github.com/ctu-mrs/ppa-stable)          |
 | ros1_noetic       | Installs bare-bones ROS-noetic with some utilities                                                 |
 | ros2_jazzy        | Installs bare-bones ROS-jazzy with some utilities                                                  |
+| node_js           | Installs Node.js for development and testing Javascript projcts                                    |
 
-### READ-ONLY mode
+**READ-ONLY mode**
 
 * In this mode, the container image can not be modified which means that programs like `apt` will fail as they modify the root file system.
 * The user can modify anything inside the `workspaces` directory mounted from the user's system.
-![Demo](.media/demo-read-only.gif)
 
-### WRITABLE mode
+**WRITABLE mode**
 
 * In this mode, the container image is actually a directory which can be modified by the user inside the container.
 * The changes made inside the container **persists** outside and in the next run of the container.
 * This mode is particularly useful when you need to install software to work with the packages inside the `workspaces` directory.
 * The user can still modify the `workspaces` directory which is mounted separately.
-![Demo](.media/demo-writable.gif)
+
+### Run from exisiting images
+
+* Images built from recipes are stored in the `images` directory.
+* `.sif` files are read-only images and directies are Writable (sandbox) images.
+* You should store your personal images (.sif) in this directory to have easy access to them using the `run_container.sh` script.
+![demo-run-container](.media/demo-run-container.png)
+
+### Run from new image
+
+* You can modify the existing recipes or use your own recipe to build a new image.
+* Recipes should be stored in the `recipes` directory and should follow the `build.sh` script as provided in the pre-existing recipes.
+
+* **Step 1**: Select the `Create from recipe` option in the first window.
+![demo-run-container](.media/demo-run-container.png)
+* **Step 2**: Select the recipe that you want to use.
+![demo-create-img](.media/demo-create-img.png)
+* **Step 3**: Select if you want to build the image as read-only (.sif) or writable (normal directory).
+![demo-modes](.media/demo-modes.png)
 
 ## Examples
 
@@ -95,6 +113,7 @@ roscd mrs_uav_gazebo_simulation/tmux/one_drone
 #### images
 
 * Contains the images and sandboxes created by the `run_container.sh`.
+* Users should store their custom images in this directory to make it visible to the `run_container.sh` script.
 * The contents of this directory are .gitignored
 
 #### install
