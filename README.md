@@ -3,6 +3,8 @@
 This repository provides a way to run the different software systems inside an [Apptainer](https://apptainer.org/) container.
 Apptainer allows you, an average user, to use software systems like the [MRS-UAV System](https://github.com/ctu-mrs/mrs_uav_system) without installing it and the required dependencies into your local system and thus prevents cluttering your OS with different software.
 
+NOTE: If you know your way around Apptainer and want to use it in a more advanced manner, you may find using https://github.com/ctu-mrs/mrs_apptainer to be more useful.
+
 **Advantages of using Apptainer for development**
 
 * The container image won't change on its own and, therefore, will work and be compatible even when you update or reinstall your system.
