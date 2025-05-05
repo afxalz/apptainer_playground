@@ -130,7 +130,7 @@ else
     fi
 
     if [[ $MODE_CHOICE =~ "1" ]]; then
-      CONTAINER_NAME="${RECIPE_OPTIONS[$RECIPE_CHOICE]}/"
+      CONTAINER_NAME="${RECIPE_OPTIONS[$RECIPE_CHOICE]}"
 
       if [[ ! -d "$IMAGES_PATH/${RECIPE_OPTIONS[$RECIPE_CHOICE]}/" ]]; then
         clear && cd "$(dirname "${IMAGE_RECIPE_MAP[${RECIPE_OPTIONS[$RECIPE_CHOICE]}]}")" && source "${IMAGE_RECIPE_MAP[${RECIPE_OPTIONS[$RECIPE_CHOICE]}]}" sandbox
@@ -153,6 +153,18 @@ USE_NVIDIA=false # true: will tell Apptainer that it should use nvidia graphics.
 OVERLAY=false  # true: will load persistant overlay (overlay can be created with scripts/create_overlay.sh)
 WRITABLE=false # true: will run it as --writable (works with --sandbox containers, image can be converted with scripts/convert_sandbox.sh)
 FAKEROOT=false # true: emulate root inside the container
+
+# make the directory for storing container-related files
+mkdir -p /tmp/apptainer
+
+# make /tmp, /var/tmp and $HOME for the user inside the container
+# DO NOT USE --containall as the in-memory /home and /tmp might not be enough for ROS
+if [[ "$CONTAINER_NAME" =~ ".sif" ]]; then
+  CUSTOM_DIR=$(mktemp -d /tmp/apptainer/"$CONTAINER_NAME".XXXX)
+  mkdir "$CUSTOM_DIR"/tmp
+  mkdir -p "$CUSTOM_DIR"/var/tmp
+  mkdir -p "$CUSTOM_DIR"/home
+fi
 
 if [[ ! "$CONTAINER_NAME" =~ ".sif" ]]; then
   WRITABLE=true          # true: will load persistant overlay (overlay can be created with scripts/create_overlay.sh)
@@ -210,7 +222,7 @@ fi
 
 if $CONTAINED; then
   # mount unique home and tmp to run multiple instances of the same image
-  CONTAINED_ARG="--containall"
+  CONTAINED_ARG="--no-mount cwd,home --mount type=bind,src=$CUSTOM_DIR/home,dst=$CONTAINER_HOME --mount type=bind,src=$CUSTOM_DIR/tmp,dst=/tmp --mount type=bind,src=$CUSTOM_DIR/var/tmp,dst=/var/tmp"
   $DEBUG && echo "Debug: running as contained"
 else
   CONTAINED_ARG="--no-mount home,cwd"
