@@ -320,7 +320,7 @@ fi
 export APPTAINERENV_DISPLAY=$DISPLAY
 
 # add the current user to xhost to use the Xserver
-xhost +local:$USER >/dev/null 2>&1
+[[ -n $DISPLAY ]] && xhost +local:$USER >/dev/null 2>&1
 
 $EXEC_CMD apptainer $ACTION \
   $NVIDIA_ARG \
@@ -335,4 +335,4 @@ $EXEC_CMD apptainer $ACTION \
   $CMD
 
 # remove the current user from xhost to prevent unwanted display access
-xhost -local:$USER >/dev/null 2>&1
+[[ -n $DISPLAY ]] && xhost -local:$USER >/dev/null 2>&1
