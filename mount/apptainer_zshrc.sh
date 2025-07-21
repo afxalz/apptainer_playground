@@ -11,9 +11,9 @@ if [ -e $CONTAINER_ENV_HOST/dot_config/dot_zshrc ]; then
   source $CONTAINER_ENV_HOST/dot_config/dot_zshrc
 fi
 
-[[ -f /opt/ros/${ROS_DISTRO}/setup.zsh ]] && source /opt/ros/${ROS_DISTRO}/setup.zsh
-
 ros2_jazzy_env() {
+  source /opt/ros/jazzy/setup.zsh
+
   # ROS2 env-varibles
   export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
   export ROS_STATIC_PEERS=''
@@ -26,10 +26,12 @@ ros2_jazzy_env() {
   alias clbt='colcon build --packages-up-to $(basename `pwd`)'
   alias clb='colcon build'
   # source the user_workspace, if it exists
-  # [ -e ~/workspaces/mrs_ros2_ws/install/setup.zsh ] && source ~/workspaces/mrs_ros2_ws/install/setup.zsh
+  [ -e ~/workspaces/mrs_ros2_ws/install/setup.zsh ] && source ~/workspaces/mrs_ros2_ws/install/setup.zsh
 }
 
 ros1_noetic_env() {
+  source /opt/ros/noetic/setup.zsh
+
   alias clbt='catkin bt'
   alias clb='catkin build'
   [ -z "$ROS_PORT" ] && export ROS_PORT=11311
@@ -43,15 +45,21 @@ ros1_noetic_env() {
     [[ -f /usr/share/gazebo/setup.bash ]] && source /usr/share/gazebo/setup.bash
   fi
 
-  # source the user_workspace, if it exists
+  # source the user_workspace, if it exists 
+  # ONLY USE ONE AT A TIME
   # [ -e ~/workspaces/indair_ws/devel/setup.zsh ] && source ~/workspaces/indair_ws/devel/setup.zsh
-  [ -e ~/workspaces/training_sim_ws/devel/setup.zsh ] && source ~/workspaces/training_sim_ws/devel/setup.zsh
+  # [ -e ~/workspaces/training_ws/devel/setup.zsh ] && source ~/workspaces/training_ws/devel/setup.zsh
+  # [ -e ~/workspaces/testing_ws/devel/setup.zsh ] && source ~/workspaces/testing_ws/devel/setup.zsh
+  # [ -e ~/workspaces/indair_ws/devel/setup.zsh ] && source ~/workspaces/indair_ws/devel/setup.zsh
+  # [ -f ~/workspaces/training_ws/devel/setup.bash ] && source ~/workspaces/training_ws/devel/setup.bash || echo "Sourcing training_ws failed"
+  # [ -f ~/workspaces/testing_ws/devel/setup.bash ] && source ~/workspaces/testing_ws/devel/setup.bash || echo "Sourcing testing_ws failed"
+  [ -f ~/workspaces/manuel_ws/devel/setup.bash ] && source ~/workspaces/manuel_ws/devel/setup.bash || echo "Sourcing manuel_ws failed"
 }
 
-if [[ "$ROS_DISTRO" =~ "noetic" ]]; then
+if [[ -f /opt/ros/noetic/setup.zsh ]]; then
   ros1_noetic_env
 fi
-if [[ "$ROS_DISTRO" =~ "jazzy" ]]; then
+if [[ -f /opt/ros/jazzy/setup.zsh ]]; then
   ros2_jazzy_env
 fi
 echo -e "Sourced ROS-$ROS_DISTRO env"
@@ -65,7 +73,7 @@ else
 fi
 
 # source the linux setup from within
-if [ -e /opt/klaxalk/git/linux-setup/appconfig/zsh/dotzshrc ]; then
+if [ -f /opt/klaxalk/git/linux-setup/appconfig/zsh/dotzshrc ]; then
 
   source /opt/klaxalk/git/linux-setup/appconfig/zsh/dotzshrc
 

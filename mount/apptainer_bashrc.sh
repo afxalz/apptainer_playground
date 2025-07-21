@@ -118,9 +118,9 @@ if [ -e $CONTAINER_ENV_HOST/dot_config/dot_bashrc ]; then
   source $CONTAINER_ENV_HOST/dot_config/dot_bashrc
 fi
 
-[[ -f /opt/ros/${ROS_DISTRO}/setup.bash ]] && source /opt/ros/${ROS_DISTRO}/setup.bash 
-
 ros2_jazzy_env() {
+  source /opt/ros/jazzy/setup.bash 
+
   # ROS2 env-varibles
   export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
   export ROS_STATIC_PEERS=''
@@ -137,6 +137,8 @@ ros2_jazzy_env() {
 }
 
 ros1_noetic_env() {
+  source /opt/ros/noetic/setup.bash
+
   alias clbt='catkin bt'
   alias clb='catkin build'
   [ -z "$ROS_PORT" ] && export ROS_PORT=11311
@@ -149,16 +151,18 @@ ros1_noetic_env() {
     export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
     [[ -f /usr/share/gazebo/setup.bash ]] && source /usr/share/gazebo/setup.bash
   fi
-
-  # source the user_workspace, if it exists
+  # source the user_workspace, if it exists 
+  # ONLY USE ONE AT A TIME
   # [ -e ~/workspaces/indair_ws/devel/setup.zsh ] && source ~/workspaces/indair_ws/devel/setup.zsh
-  [ -e ~/workspaces/training_sim_ws/devel/setup.bash ] && source ~/workspaces/training_sim_ws/devel/setup.bash
+  # [ -f ~/workspaces/training_ws/devel/setup.bash ] && source ~/workspaces/training_ws/devel/setup.bash || echo "Sourcing training_ws failed"
+  # [ -f ~/workspaces/testing_ws/devel/setup.bash ] && source ~/workspaces/testing_ws/devel/setup.bash || echo "Sourcing testing_ws failed"
+  [ -f ~/workspaces/manuel_ws/devel/setup.bash ] && source ~/workspaces/manuel_ws/devel/setup.bash || echo "Sourcing manuel_ws failed"
 }
 
-if [[ "$ROS_DISTRO" =~ "noetic" ]]; then
+if [[ -f /opt/ros/noetic/setup.bash ]]; then
   ros1_noetic_env
 fi
-if [[ "$ROS_DISTRO" =~ "jazzy" ]]; then
+if [[ -f /opt/ros/jazzy/setup.bash ]]; then
   ros2_jazzy_env
 fi
 echo -e "Sourced ROS-$ROS_DISTRO env"
@@ -172,7 +176,7 @@ else
 fi
 
 # source the linux setup from within
-if [ -e /opt/klaxalk/git/linux-setup/appconfig/bash/dotbashrc ]; then
+if [ -f /opt/klaxalk/git/linux-setup/appconfig/bash/dotbashrc ]; then
 
   source /opt/klaxalk/git/linux-setup/appconfig/bash/dotzshrc
 
