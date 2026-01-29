@@ -180,8 +180,9 @@ MOUNTS=(
   # mount the custom user workspace into the container
   #           HOST PATH                                  CONTAINER PATH
   "type=bind" "$APPTAINER_PATH/workspaces" "$CONTAINER_HOME/workspaces"
+  "type=bind" "$HOME/.gitcache" "$CONTAINER_HOME/.gitcache"
 
-  # this dir stCONFIGcustom config only used for the apptainer containers
+  # this dir custom config only used for the apptainer containers
   "type=bind" "$MOUNT_PATH" "$CONTAINER_ENV_HOST/apptainer_config/"
 
   # use the shell config of the user inside the container
@@ -250,10 +251,17 @@ else
 fi
 
 if $CLEAN_ENV; then
-  CLEAN_ENV_ARG="-e"
+  CLEAN_ENV_ARG="--cleanenv"
   $DEBUG && echo "Debug: clean env"
 else
   CLEAN_ENV_ARG=""
+fi
+
+if $ENV_VAR; then
+  ENV_VAR_ARG="--env SSH_AUTH_SOCK=$SSH_AUTH_SOCK"
+  $DEBUG && echo "Debug: adding env var"
+else
+  ENV_VAR_ARG=""
 fi
 
 # if we want nvidia, add the "--nv" arg
@@ -328,6 +336,7 @@ $EXEC_CMD apptainer $ACTION \
   $CONTAINED_ARG \
   $WRITABLE_ARG \
   $CLEAN_ENV_ARG \
+  $ENV_VAR_ARG \
   $FAKE_ROOT_ARG \
   $KEEP_ROOT_PRIVS_ARG \
   $MOUNT_ARG \
