@@ -41,6 +41,7 @@ From: klaxalk/linux-setup:master # uncomment for bootstrapping from Tomas's linu
 
 %environment
     export LC_ALL=C
+    export ROS_DISTRO=noetic
 
 %runscript
   CMD="${@}"

@@ -19,6 +19,7 @@ From: ctumrs/mrs_uav_system:latest
 
 %environment
     export LC_ALL=C
+    export ROS_DISTRO=noetic
 
 %runscript
   CMD="${@}"
