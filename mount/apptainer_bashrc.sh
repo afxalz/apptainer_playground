@@ -120,7 +120,7 @@ if [ -e $CONTAINER_ENV_HOST/dot_config/dot_bashrc ]; then
 fi
 
 ros2_env() {
-    source /opt/ros/$ROS_DISTRO/setup.zsh
+    source /opt/ros/$ROS_DISTRO/setup.bash
 
     # ROS2 env-varibles
     export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
@@ -134,11 +134,11 @@ ros2_env() {
     alias clbt='colcon build --packages-up-to $(basename `pwd`)'
     alias clb='colcon build'
     # source the user_workspace, if it exists
-    #   [ -e ~/workspaces/mrs_ros2_ws/install/setup.zsh ] && source ~/workspaces/mrs_ros2_ws/install/setup.zsh
+    #   [ -e ~/workspaces/mrs_ros2_ws/install/setup.bash ] && source ~/workspaces/mrs_ros2_ws/install/setup.bash
 }
 
 ros1_env() {
-    source /opt/ros/$ROS_DISTRO/setup.zsh
+    source /opt/ros/$ROS_DISTRO/setup.bash
 
     alias clbt='catkin bt'
     alias clb='catkin build'
@@ -154,13 +154,13 @@ ros1_env() {
     fi
     # source the user_workspace, if it exists
     # ONLY USE ONE AT A TIME
-    # [ -e ~/workspaces/indair_ws/devel/setup.zsh ] && source ~/workspaces/indair_ws/devel/setup.zsh
+    # [ -e ~/workspaces/indair_ws/devel/setup.bash ] && source ~/workspaces/indair_ws/devel/setup.bash
     # [ -f ~/workspaces/training_ws/devel/setup.bash ] && source ~/workspaces/training_ws/devel/setup.bash || echo "Sourcing training_ws failed"
     # [ -f ~/workspaces/testing_ws/devel/setup.bash ] && source ~/workspaces/testing_ws/devel/setup.bash || echo "Sourcing testing_ws failed"
     # [ -f ~/workspaces/manuel_ws/devel/setup.bash ] && source ~/workspaces/manuel_ws/devel/setup.bash || echo "Sourcing manuel_ws failed"
     # [ -f ~/workspaces/tmp_ros1_ws/devel/setup.bash ] && source ~/workspaces/tmp_ros1_ws/devel/setup.bash || echo "Sourcing tmp_ros1_ws failed"
     # [ -f ~/workspaces/mrs_ros1/devel/setup.bash ] && source ~/workspaces/mrs_ros1/devel/setup.bash || echo "Sourcing mrs_ros1 failed"
-    [ -f ~/workspaces/rbl_ws/devel/setup.bash ] && source ~/workspaces/rbl_ws/devel/setup.bash || echo "Sourcing rbl_ws failed"
+    # [ -f ~/workspaces/rbl_ws/devel/setup.bash ] && source ~/workspaces/rbl_ws/devel/setup.bash || echo "Sourcing rbl_ws failed"
 }
 
 # Read ROS_DISTRO environment variable
@@ -168,14 +168,14 @@ ROS_DISTRO=${ROS_DISTRO:-"unknown"}
 
 case $ROS_DISTRO in
 "noetic")
-    echo "Sourced ROS Noetic"
     # Noetic-specific commands here
     ros1_env
+    echo "Sourced ROS Noetic"
     ;;
 "jazzy")
-    echo "Sourced ROS 2 Jazzy"
     # Jazzy-specific commands here
     ros2_env
+    echo "Sourced ROS 2 Jazzy"
     ;;
 *)
     echo "Unknown or unset ROS_DISTRO: $ROS_DISTRO"
@@ -193,9 +193,7 @@ fi
 
 # source the linux setup from within
 if [ -f /opt/klaxalk/git/linux-setup/appconfig/bash/dotbashrc ]; then
-
-    source /opt/klaxalk/git/linux-setup/appconfig/bash/dotzshrc
-
+    source /opt/klaxalk/git/linux-setup/appconfig/bash/dotbashrc
 fi
 
 # >>> conda initialize >>>

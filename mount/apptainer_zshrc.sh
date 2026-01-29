@@ -65,13 +65,12 @@ case $ROS_DISTRO in
 "noetic")
     echo "Sourced ROS Noetic"
     # Noetic-specific commands here
-    ros1_noetic_env
+    ros1_env
     ;;
 "jazzy")
-    ros2_jazzy_env
+    ros2_env
     echo "Sourced ROS 2 Jazzy"
     # Jazzy-specific commands here
-
     ;;
 *)
     echo "Unknown or unset ROS_DISTRO: $ROS_DISTRO"
