@@ -1,6 +1,6 @@
 Bootstrap: docker
 
-From: ctumrs/mrs_uav_system:latest
+From: ctumrs/mrs_uav_system:1.5.1
 
 %post
 

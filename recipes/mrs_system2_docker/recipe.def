@@ -1,0 +1,50 @@
+Bootstrap: docker
+
+From: ctumrs/mrs_uav_system:stable
+
+%post
+    # fix prompts during installation
+    apt-get -y update
+    echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+    apt-get install -y -q
+    DEBIAN_FRONTEND=noninteractive apt-get -y install keyboard-configuration
+
+  apt-get -y install \
+    git \
+    tmux \
+    python3-pip \
+    bat \
+    tmuxinator \
+    fonts-powerline \
+    zsh \
+    curl \
+    dialog
+
+  # intall prompt manager for zsh
+  curl -sS https://starship.rs/install.sh | sh -s -- -y
+
+  # install Oh-my-Zsh
+  export ZSH=/opt/oh-my-zsh && sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+  # directory to store env config files
+  export CONTAINER_ENV_HOST=/opt/env/host
+  mkdir -p $CONTAINER_ENV_HOST
+
+  # link the env file (will be mounted at runtime) to the default env file
+  # file in /.singularity.d/env/99-env.sh are sourced at startup
+  ln -s $CONTAINER_ENV_HOST/apptainer_config/99-env.sh /.singularity.d/env/99-env.sh
+
+%environment
+    export LC_ALL=C
+    export ROS_DISTRO=jazzy
+
+%runscript
+    CMD="${@}"
+
+    if [ -z "${CMD}" ]; then
+    /bin/zsh --login
+    else
+    /bin/zsh --login -c "${CMD}"
+    fi
+
+    exit 0
